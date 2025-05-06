@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import {
   Code2,
@@ -7,11 +6,10 @@ import {
   Database,
   Palette,
   Image,
-  Layout,
   Layers,
 } from "lucide-react";
 
-const metrics = [
+const services = [
   {
     icon: Code2,
     title: "MERN-Stack",
@@ -50,78 +48,70 @@ const metrics = [
   },
 ];
 
-export default function MetricsDashboard() {
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { type: "spring", stiffness: 20, duration: 0.6 },
+};
+
+export default function Services() {
   return (
-    <section className="py-24 bg-white text-[#47525d]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header im Homepage-Stil */}
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="mb-16 lg:mb-24"
+          viewport={{ once: true }}
+          className="mb-16 text-center"
         >
-          <div className="relative pl-6 border-l-4 border-[#b29d88]">
-            <motion.h2
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-4xl md:text-5xl font-bold mb-4"
-            >
-              Was wir bieten
-            </motion.h2>
-            <motion.p
-              className="text-xl text-[#47525d]/90 max-w-2xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              Technische Exzellenz trifft auf kreative Umsetzung
-            </motion.p>
-          </div>
+          <motion.h2
+            {...fadeInUp}
+            className="text-3xl md:text-4xl font-bold text-[#080706] mb-4"
+          >
+            Unsere <span className="text-[#b29d88]">Services</span>
+          </motion.h2>
+          <motion.p
+            {...fadeInUp}
+            transition={{ delay: 0.2 }}
+            className="text-xl text-[#5d5247] max-w-2xl mx-auto"
+          >
+            Technische Exzellenz trifft auf kreative Umsetzung
+          </motion.p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {metrics.map((metric, index) => (
+        {/* Services Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, index) => (
             <motion.div
               key={index}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              variants={{
-                hidden: { opacity: 0, y: 40 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    type: "spring",
-                    stiffness: 50,
-                    delay: index * 0.15,
-                  },
-                },
-              }}
+              variants={fadeInUp}
+              transition={{ delay: index * 0.15 }}
+              className="group relative"
             >
-              <div className="group relative h-full">
-                {/* Hover-Gradient */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#e8ded3] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                {/* Card Content */}
-                <div className="relative z-10 h-full bg-white p-8 rounded-xl border border-[#e0d7cf] shadow-sm group-hover:shadow-md transition-shadow duration-300">
-                  <div className="mb-6">
-                    <metric.icon className="h-12 w-12 text-[#47525d] group-hover:text-[#b29d88] transition-colors duration-300" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-4">
-                    {metric.title}
-                  </h3>
-                  <p className="text-[#47525d]/90 leading-relaxed">
-                    {metric.description}
-                  </p>
-
-                  {/* Bottom Indicator */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#b29d88] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-5 rounded-xl`} />
+              
+              <div className="relative h-full bg-white p-8 rounded-xl border border-[#e0d7cf] hover-glow transition-all">
+                <div className={`w-14 h-14 rounded-lg ${service.gradient.replace('from', 'bg-gradient-to-br from')} mb-6 flex items-center justify-center text-white`}>
+                  <service.icon className="h-6 w-6" />
                 </div>
+                <h3 className="text-xl font-bold text-[#080706] mb-3">
+                  {service.title}
+                </h3>
+                <p className="text-[#5d5247]">
+                  {service.description}
+                </p>
               </div>
             </motion.div>
           ))}
         </div>
+
+        {/* Hintergrund-Elemente im Homepage-Stil */}
+        <div className="absolute top-1/3 left-0 w-72 h-72 bg-[#b29d88]/5 rounded-full blur-3xl -z-10" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#47525d]/5 rounded-full blur-3xl -z-10" />
       </div>
     </section>
   );

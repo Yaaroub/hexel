@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Users, FileText, Euro } from "lucide-react";
+import { Briefcase, Users, FileText } from "lucide-react";
 
 const metrics = [
   {
@@ -26,65 +26,49 @@ const metrics = [
 
 export default function MetricsDashboard() {
   return (
-    <section className="relative py-24 bg-[#f3f4f6] text-[#47525d]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header mit identischer Akzentlinie */}
+    <section className="relative py-24 bg-[#f9f7f5]">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header im Stil der Homepage */}
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="mb-16 lg:mb-24"
+          viewport={{ once: true }}
+          className="mb-16 text-center"
         >
-          <div className="relative pl-6 border-l-4 border-[#47525d]">
-            <motion.h2
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-4xl font-bold text-[#47525d] mb-4"
-            >
-              Unternehmensdaten
-            </motion.h2>
-            <motion.p
-              className="text-xl text-[#47525d] max-w-2xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              Echtzeit-Überblick über unsere Aktivitäten
-            </motion.p>
-          </div>
+          <motion.h2
+            {...fadeInUp}
+            className="text-3xl md:text-4xl font-bold text-[#080706] mb-4"
+          >
+            Unsere <span className="text-[#b29d88]">Leistungen</span> in Zahlen
+          </motion.h2>
+          <motion.p
+            {...fadeInUp}
+            transition={{ delay: 0.2 }}
+            className="text-xl text-[#5d5247] max-w-2xl mx-auto"
+          >
+            Transparenz durch klare Kennzahlen
+          </motion.p>
         </motion.div>
 
-        {/* Metrik-Karten mit animierten Zählern */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Metrik-Karten im Homepage-Design */}
+        <div className="grid md:grid-cols-3 gap-8">
           {metrics.map((metric, index) => (
             <motion.div
               key={index}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              variants={{
-                hidden: { opacity: 0, y: 40 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    type: "spring",
-                    stiffness: 50,
-                    delay: index * 0.15,
-                  },
-                },
-              }}
+              variants={fadeInUp}
+              transition={{ delay: index * 0.15 }}
               className="group relative h-full"
             >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-20 transition-opacity duration-300 rounded-xl ${metric.gradient}`}
-              />
-
-              <div className="relative h-full bg-white p-8 rounded-xl border border-[#e0d7cf] shadow-sm hover:shadow-md transition-all">
-                <div className="mb-6">
-                  <metric.icon className="h-12 w-12 text-[#47525d] group-hover:text-[#b29d88] transition-colors" />
+              <div className={`absolute inset-0 bg-gradient-to-br ${metric.gradient} opacity-5 rounded-xl`} />
+              
+              <div className="relative h-full bg-white p-8 rounded-xl border border-[#e0d7cf] hover-glow transition-all">
+                <div className={`w-14 h-14 rounded-lg ${metric.gradient.replace('from', 'bg-gradient-to-br from')} mb-6 flex items-center justify-center text-white`}>
+                  <metric.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-2xl font-semibold text-[#47525d] mb-4">
+                <h3 className="text-xl font-bold text-[#080706] mb-4">
                   {metric.title}
                 </h3>
                 <p className="text-4xl font-bold text-[#47525d]">
@@ -94,15 +78,12 @@ export default function MetricsDashboard() {
                     metric.value
                   )}
                 </p>
-
-                {/* Hover-Indicator */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#47525d] opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Hintergrund-Elemente */}
+        {/* Hintergrund-Elemente im Homepage-Stil */}
         <div className="absolute top-1/3 left-0 w-72 h-72 bg-[#b29d88]/5 rounded-full blur-3xl -z-10" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#47525d]/5 rounded-full blur-3xl -z-10" />
       </div>
@@ -110,7 +91,7 @@ export default function MetricsDashboard() {
   );
 }
 
-// Animierter Zähler-Komponente
+// Animierter Zähler (unverändert)
 function Counter({ target }) {
   const [count, setCount] = useState(0);
 
@@ -133,3 +114,10 @@ function Counter({ target }) {
 
   return <span>{count}</span>;
 }
+
+// Konsistente Animationen wie in der Homepage
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { type: "spring", stiffness: 20, duration: 0.6 },
+};

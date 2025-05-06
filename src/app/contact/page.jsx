@@ -25,31 +25,31 @@ export default function ContactForm() {
   const [submitStatus, setSubmitStatus] = useState(null)
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true)
-    setSubmitStatus(null)
-
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+  
     try {
-      const res = await fetch('https://hexel-tech.de/contact.php', {
+      const res = await fetch('https://hexel-api.onrender.com/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      })
-
-      const responseData = await res.json()
-
+      });
+  
+      const responseData = await res.json();
+  
       if (res.ok) {
-        setSubmitStatus({ type: 'success', message: responseData.message })
-        reset()
+        setSubmitStatus({ type: 'success', message: responseData.message });
+        reset();
       } else {
-        setSubmitStatus({ type: 'error', message: responseData.message })
+        setSubmitStatus({ type: 'error', message: responseData.message || 'Ein Fehler ist aufgetreten.' });
       }
     } catch {
-      setSubmitStatus({ type: 'error', message: 'Fehler! Bitte versuchen Sie es später erneut.' })
+      setSubmitStatus({ type: 'error', message: 'Fehler! Bitte versuchen Sie es später erneut.' });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
-
+  };
+  
   return (
     <section className="py-16 bg-[#f5f3f0] px-4">
       <motion.div

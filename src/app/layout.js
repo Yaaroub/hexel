@@ -4,7 +4,6 @@ import Head from "next/head";
 import "./globals.css";
 import Navigation from "./components/ui/Navigation";
 import Footer from "./components/ui/Footer";
-
 export const metadata = {
   title: "HEXEL tech | Software & Design Lösungen",
   description: "Individuelle Softwareentwicklung, Webdesign und App-Entwicklung aus Deutschland - maßgeschneiderte digitale Lösungen für Ihr Business",

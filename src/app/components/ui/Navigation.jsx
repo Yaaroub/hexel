@@ -1,43 +1,79 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
-import { FiMenu, FiX } from 'react-icons/fi'
-import Image from 'next/image'
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 const links = [
   { path: '/', name: 'Home' },
   { path: '/services', name: 'Services' },
   { path: '/metrics', name: 'Metrics Dashboard' },
   { path: '/contact', name: 'Contact' }
-]
+];
+
+const letters = 'Hexel Tech'.split('');
 
 export default function Navigation() {
-  const path = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
+  const path = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 300);
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <nav className="fixed top-0 w-full bg-gradient-to-r from-[#b29d88] to-[#47525d] backdrop-blur-md shadow-md z-50">
-      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-        {/* Logo */}
-        <Link 
-          href="/" 
-          className="hover:text-hexel-accent transition"
-          onClick={() => setIsOpen(false)}
-        >
-          <div className="flex items-center">
-            <Image 
-              src="/images/x.png" 
-              alt="Hexel Icon" 
-              width={32}
-              height={32}
-              className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 mr-2"
+      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between relative">
+        {/* Logo + Hexel Tech */}
+        <div className="flex items-center gap-2">
+          {/* Logo */}
+          {/** Desktop: Logo with rotation animation */}
+          <motion.div
+            className="hidden sm:block flex-shrink-0"
+            animate={mounted ? { rotate: 360 } : {}}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            <Image
+              src="/images/x.png"
+              alt="Hexel Icon"
+              width={36}
+              height={36}
+              className="w-8 h-8 sm:w-10 sm:h-10"
             />
-            <span className="sr-only">Home</span>
+          </motion.div>
+
+          {/** Mobile: Static Logo */}
+          <div className="block sm:hidden flex-shrink-0">
+            <Image
+              src="/images/x.png"
+              alt="Hexel Icon"
+              width={36}
+              height={36}
+              className="w-8 h-8 sm:w-10 sm:h-10"
+            />
           </div>
-        </Link>
+
+          {/* Hexel Tech Text with Slide Animation */}
+          <div className="flex gap-[2px]">
+            {letters.map((char, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, y: -10 }}
+                animate={mounted ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
+                className={`text-white text-lg font-semibold ${
+                  char === 'x' ? 'text-[#47525d]' : ''
+                }`}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </div>
+        </div>
 
         {/* Desktop Links */}
         <div className="hidden md:flex gap-6 lg:gap-8">
@@ -61,49 +97,47 @@ export default function Navigation() {
           ))}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white hover:text-hexel-accent transition p-1"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
+        {/* Mobile Menu Icon */}
+        <button
+          className="md:hidden text-white focus:outline-none"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle Mobile Menu"
         >
-          {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          {mobileMenuOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          )}
         </button>
       </div>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden bg-[#47525d]/95 backdrop-blur-md px-6 py-4"
-          >
-            <div className="flex flex-col space-y-3">
-              {links.map((link) => (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  className={`py-2 text-base text-white hover:text-hexel-accent transition ${
-                    link.path === path ? 'font-semibold' : 'font-medium'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.name}
-                  {link.path === path && (
-                    <motion.span
-                      layoutId="mobile-underline"
-                      className="block h-[2px] w-full bg-hexel-accent mt-1"
-                      transition={{ type: 'spring', bounce: 0.3, duration: 0.5 }}
-                    />
-                  )}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Mobile Links */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={mobileMenuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+        className={`md:hidden px-4 pb-3 absolute w-full bg-gradient-to-b from-[#b29d88] to-[#47525d] transition-all duration-300 ease-in-out ${
+          mobileMenuOpen ? 'block' : 'hidden'
+        }`}
+      >
+        <div className="flex flex-col space-y-2 mt-2 p-4">
+          {links.map((link) => (
+            <Link
+              key={link.path}
+              href={link.path}
+              className={`text-base text-white hover:text-hexel-accent transition ${
+                link.path === path ? 'font-semibold' : 'font-medium'
+              }`}
+              onClick={() => setMobileMenuOpen(false)} // Close menu on link click
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
+      </motion.div>
     </nav>
-  )
+  );
 }

@@ -1,92 +1,68 @@
+// app/api/contact/route.js
 import nodemailer from 'nodemailer';
 
 export async function POST(req) {
-  // Validierung der Content-Type
-  if (req.headers.get('content-type') !== 'application/json') {
-    return new Response(
-      JSON.stringify({ message: 'Nur JSON-Inhalt erlaubt' }),
-      { status: 415 }
-    );
+  const { name, email, message } = await req.json();
+
+  // Debug-Logging der Umgebungsvariablen (nur für Entwicklung)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Env Variables:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER,
+      to: process.env.EMAIL_TO
+    });
   }
 
+  // Konfiguration für IONOS
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.ionos.de', // IONOS Standard-SMTP
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: false, // true für Port 465
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      ciphers: 'SSLv3', // Manchmal benötigt für IONOS
+      rejectUnauthorized: false // Bei Zertifikatsproblemen
+    }
+  });
+
+  const mailOptions = {
+    from: `"Kontaktformular" <${process.env.EMAIL_USER}>`,
+    to: process.env.EMAIL_TO,
+    replyTo: email, // Damit Antworten an Absender gehen
+    subject: `Neue Nachricht von ${name}`,
+    text: `Name: ${name}\nEmail: ${email}\nNachricht:\n${message}`,
+    html: `
+      <h2>Neue Kontaktanfrage</h2>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Nachricht:</strong></p>
+      <p>${message.replace(/\n/g, '<br>')}</p>
+    `
+  };
+
   try {
-    const { name, email, message } = await req.json();
-
-    // Erweiterte Validierung
-    if (!name || !email || !message) {
-      return new Response(
-        JSON.stringify({ message: 'Alle Felder sind erforderlich' }),
-        { status: 400 }
-      );
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return new Response(
-        JSON.stringify({ message: 'Ungültige E-Mail-Adresse' }),
-        { status: 400 }
-      );
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || 'smtp.ionos.de',
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        ciphers: 'SSLv3', // Manchmal benötigt für IONOS
-        rejectUnauthorized: false // Nur im Test verwenden!
+    await transporter.sendMail(mailOptions);
+    return new Response(JSON.stringify({ 
+      message: 'Nachricht erfolgreich gesendet! Wir melden uns bald.' 
+    }), { 
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
       }
     });
-console.log(process.env.EMAIL_USER);
-
-    const mailOptions = {
-      from: `"${name}" <${process.env.EMAIL_USER}>`,
-      replyTo: email,
-      to: process.env.EMAIL_TO,
-      subject: `Neue Nachricht von ${name} (HEXEL-Kunde)`,
-      text: `Kontaktanfrage:\n\nName: ${name}\nE-Mail: ${email}\n\nNachricht:\n${message}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px;">
-          <h2 style="color: #2563eb;">Neue Kontaktanfrage</h2>
-          <p><strong>Von:</strong> ${name} (${email})</p>
-          <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
-            ${message.replace(/\n/g, '<br>')}
-          </div>
-          <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
-            Gesendet über das HEXEL-Kontaktformular
-          </p>
-        </div>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-    
-    return new Response(
-      JSON.stringify({ message: 'Nachricht erfolgreich gesendet!' }),
-      { 
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
   } catch (error) {
-    console.error('Fehler:', error);
-    return new Response(
-      JSON.stringify({ 
-        message: 'Serverfehler beim Senden',
-        error: process.env.NODE_ENV === 'development' ? error.message : null
-      }),
-      { 
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+    console.error('Mail send error:', error);
+    return new Response(JSON.stringify({ 
+      message: `Fehler beim Senden: ${error.message}` 
+    }), { 
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
       }
-    );
+    });
   }
 }
