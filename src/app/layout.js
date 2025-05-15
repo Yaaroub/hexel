@@ -4,6 +4,7 @@ import Head from "next/head";
 import "./globals.css";
 import Navigation from "./components/ui/Navigation";
 import Footer from "./components/ui/Footer";
+import Chat from "./components/Chat";
 export const metadata = {
   title: "HEXEL tech | Software & Design Lösungen",
   description: "Individuelle Softwareentwicklung, Webdesign und App-Entwicklung aus Deutschland - maßgeschneiderte digitale Lösungen für Ihr Business",
@@ -70,6 +71,7 @@ export default function RootLayout({ children }) {
       <body className="bg-white text-gray-800 font-inter antialiased">
         <GoogleTagManager gtmId="GTM-XXXXXX" />
         <Navigation />
+        <Chat />
         <main className="min-h-[calc(100vh-320px)] pt-14">
           {children}
         </main>

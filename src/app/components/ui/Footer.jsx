@@ -80,7 +80,7 @@ export default function Footer() {
           </div>
 
           {/* Link Groups */}
-          {footerLinks.map((section, index) => (
+          {footerLinks.length > 0 && footerLinks.map((section, index) => (
             <div key={index} className="space-y-4">
               <h3 className="text-white/80 font-medium mb-4">
                 {section.title}
@@ -91,6 +91,8 @@ export default function Footer() {
                     <Link
                       href={link.href}
                       className="flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
+                      target={link.href.startsWith('http') ? '_blank' : '_self'}
+                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                     >
                       {link.name}
                       {link.href.startsWith('http') && (

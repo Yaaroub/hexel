@@ -32,30 +32,38 @@ export default function Navigation() {
         <div className="flex items-center gap-2">
           {/* Logo */}
           {/** Desktop: Logo with rotation animation */}
+          <Link href="/" className="flex-shrink-0">
           <motion.div
             className="hidden sm:block flex-shrink-0"
             animate={mounted ? { rotate: 360 } : {}}
             transition={{ delay: 0.5, duration: 0.8 }}
-          >
+            >
             <Image
               src="/images/x.png"
               alt="Hexel Icon"
               width={36}
               height={36}
               className="w-8 h-8 sm:w-10 sm:h-10"
-            />
+              />
           </motion.div>
+              </Link>
 
           {/** Mobile: Static Logo */}
-          <div className="block sm:hidden flex-shrink-0">
+          <Link href="/" className="flex-shrink-0">
+          <motion.div
+            className="block sm:hidden flex-shrink-0"
+            animate={mounted ? { rotate: 360 } : {}}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            >
             <Image
               src="/images/x.png"
               alt="Hexel Icon"
               width={36}
               height={36}
               className="w-8 h-8 sm:w-10 sm:h-10"
-            />
-          </div>
+              />
+          </motion.div>
+              </Link>
 
           {/* Hexel Tech Text with Slide Animation */}
           <div className="flex gap-[2px]">
