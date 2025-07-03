@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && cp .htaccess out/.htaccess && chmod 644 out/.htaccess",
-    "export": "next export && cp .htaccess out/.htaccess",
+    "export": "next export",
     "start": "next start",
     "lint": "next lint"
   },
