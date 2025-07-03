@@ -6,7 +6,7 @@ export function OPTIONS () {
   return NextResponse.json({}, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin' : process.env.CORS_ORIGIN || '*', // z. B. 'https://hexel-tech.de'
+      'Access-Control-Allow-Origin' : 'https://hexel-tech.de' || '*', // z. B. 
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age'      : '86400', // 1 Tag cachebar
