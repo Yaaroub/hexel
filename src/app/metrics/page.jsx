@@ -26,7 +26,7 @@ const metrics = [
 
 export default function MetricsDashboard() {
   return (
-    <section className="relative py-24 bg-[#f9f7f5]">
+    <section className="relative py-24 ">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header im Stil der Homepage */}
         <motion.div

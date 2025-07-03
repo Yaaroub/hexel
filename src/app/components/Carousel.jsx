@@ -1,44 +1,41 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-// replace icons with your own if needed
-import {
-  FiCircle,
-  FiCode,
-  FiFileText,
-  FiLayers,
-  FiLayout,
-} from "react-icons/fi";
+import { FiCircle, FiCode, FiFileText, FiLayers, FiLayout } from "react-icons/fi";
 
+// Icons-Konstante zur Wiederverwendung
+const ICONS = {
+  text: <FiFileText className="h-[16px] w-[16px] text-white" />,
+  code: <FiCode className="h-[16px] w-[16px] text-white" />,
+  layers: <FiLayers className="h-[16px] w-[16px] text-white" />,
+  layout: <FiLayout className="h-[16px] w-[16px] text-white" />,
+  circle: <FiCircle className="h-[16px] w-[16px] text-white" />,
+};
+
+// Standard-Items für das Carousel
 const DEFAULT_ITEMS = [
   {
+    id: 1,
     title: "Text Animations",
     description: "Cool text animations for your projects.",
-    id: 1,
-    icon: <FiFileText className="h-[16px] w-[16px] text-white" />,
+    icon: ICONS.text,
   },
   {
-    title: "Animations",
-    description: "Smooth animations for your projects.",
     id: 2,
-    icon: <FiCircle className="h-[16px] w-[16px] text-white" />,
+    title: "Code Snippets",
+    description: "Reusable code snippets for faster development.",
+    icon: ICONS.code,
   },
   {
-    title: "Components",
-    description: "Reusable components for your projects.",
     id: 3,
-    icon: <FiLayers className="h-[16px] w-[16px] text-white" />,
+    title: "Layered Designs",
+    description: "Create stunning layered UI designs.",
+    icon: ICONS.layers,
   },
   {
-    title: "Backgrounds",
-    description: "Beautiful backgrounds and patterns for your projects.",
     id: 4,
-    icon: <FiLayout className="h-[16px] w-[16px] text-white" />,
-  },
-  {
-    title: "Common UI",
-    description: "Common UI components are coming soon!",
-    id: 5,
-    icon: <FiCode className="h-[16px] w-[16px] text-white" />,
+    title: "Layouts",
+    description: "Responsive layouts for all devices.",
+    icon: ICONS.layout,
   },
 ];
 

@@ -1,6 +1,6 @@
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useState } from "react";
-
+import Image from 'next/image';
 function CardRotate({ children, onSendToBack, sensitivity }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -102,7 +102,7 @@ export default function Stack({
                 height: cardDimensions.height,
               }}
             >
-              <img
+              <Image
                 src={card.img}
                 alt={`card-${card.id}`}
                 className="w-full h-full object-content pointer-events-none"

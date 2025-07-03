@@ -29,7 +29,7 @@ export default function ContactForm() {
     setSubmitStatus(null);
   
     try {
-      const res = await fetch('https://hexel-api.onrender.com/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -49,20 +49,28 @@ export default function ContactForm() {
       setIsSubmitting(false);
     }
   };
-  
+
+  const containerAnimation = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4 },
+  };
+
+  const headingAnimation = {
+    initial: { scale: 0.95 },
+    animate: { scale: 1 },
+  };
+
   return (
-    <section className="py-16 bg-[#f5f3f0] px-4">
+    <section className="py-16 px-4">
       <motion.div
         className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8 sm:p-12"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        {...containerAnimation}
       >
         <div className="text-center">
           <motion.h2
             className="text-4xl font-bold text-[#5d5247] mb-2"
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
+            {...headingAnimation}
           >
             Kontaktieren Sie uns
           </motion.h2>

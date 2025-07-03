@@ -36,7 +36,14 @@ export default function Navigation() {
           <motion.div
             className="hidden sm:block flex-shrink-0"
             animate={mounted ? { rotate: 360 } : {}}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            transition={{ 
+              delay: 1.5, 
+              duration: 1.5, 
+              repeat: Infinity,  
+              repeatDelay: 3,
+              repeatType: "reverse",
+              ease: "easeInOut" // oder "anticipate", "circOut", etc.
+            }}
             >
             <Image
               src="/images/x.png"
@@ -53,7 +60,13 @@ export default function Navigation() {
           <motion.div
             className="block sm:hidden flex-shrink-0"
             animate={mounted ? { rotate: 360 } : {}}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            transition={{ 
+              delay: 1.5, 
+              duration: 1.5, 
+              repeat: Infinity,
+              repeatDelay: 3,
+              repeatType: "reverse",
+              ease: "easeInOut" }}
             >
             <Image
               src="/images/x.png"
