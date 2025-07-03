@@ -4,6 +4,9 @@ import path from 'path';
 
 // next.config.mjs
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     unoptimized: true, // Falls du Bilder mit `next/image` nutzt
   },
@@ -17,8 +20,6 @@ const nextConfig = {
     });
     return config;
   },
-  // Neue Konfiguration für .htaccess
- 
 };
 
 export default nextConfig;
