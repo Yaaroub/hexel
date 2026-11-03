@@ -1,58 +1,12 @@
-// app/api/contact/route.js
 import nodemailer from 'nodemailer';
-
-export async function POST(req) {
-  try {
-    const { name, email, message } = await req.json();
-
-    // Debug-Logging der Umgebungsvariablen (nur in Entwicklung)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Mailer-ENV:', {
-        user: process.env.EMAIL_USER,
-        to: process.env.EMAIL_TO,
-      });
-    }
-
-    // Gmail Transporter konfigurieren
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, 
-      },
-    });
-
-    const mailOptions = {
-      from: `"Website-Kontakt" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_TO,
-      replyTo: email,
-      subject: `Neue Nachricht von ${name}`,
-      text: `Name: ${name}\nE-Mail: ${email}\n\nNachricht:\n${message}`,
-      html: `
-        <h2>Neue Kontaktanfrage</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>E-Mail:</strong> ${email}</p>
-        <p><strong>Nachricht:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    return new Response(JSON.stringify({
-      message: 'Nachricht erfolgreich gesendet! Wir melden uns bald.'
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-  } catch (error) {
-    console.error('E-Mail-Versandfehler:', error);
-    return new Response(JSON.stringify({
-      message: `Fehler beim Senden: ${error.message}`
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
+const topics=['Netzwerk & WLAN','Website','Webanwendung','Marke & Design','Noch offen'];
+export async function POST(req){
+  let data;try{data=await req.json();}catch{return Response.json({message:'Ungültige Anfrage.'},{status:400});}
+  if(!data||typeof data!=='object')return Response.json({message:'Ungültige Anfrage.'},{status:400});
+  const fields={name:150,email:254,message:5000,company:150,location:150,topic:60};
+  for(const [key,max] of Object.entries(fields)){if(data[key]!==undefined&&(typeof data[key]!=='string'||data[key].length>max))return Response.json({message:'Bitte prüfen Sie Ihre Angaben.'},{status:400});}
+  const {name='',email='',message='',company='',location='',topic='Noch offen'}=data;
+  if(!name.trim()||/[\r\n]/.test(name)||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||message.trim().length<10||!topics.includes(topic)||(topic==='Netzwerk & WLAN'&&!location.trim()))return Response.json({message:'Bitte füllen Sie alle Pflichtfelder korrekt aus.'},{status:400});
+  if(!process.env.EMAIL_USER||!process.env.EMAIL_PASS||!process.env.EMAIL_TO)return Response.json({message:'Der Versand ist momentan nicht verfügbar.'},{status:503});
+  try{const transporter=nodemailer.createTransport({service:'Gmail',auth:{user:process.env.EMAIL_USER,pass:process.env.EMAIL_PASS}});await transporter.sendMail({from:{name:'FUNKNAHT Website',address:process.env.EMAIL_USER},to:process.env.EMAIL_TO,replyTo:email,subject:`FUNKNAHT Anfrage: ${topic}`,text:`Name: ${name}\nE-Mail: ${email}\nUnternehmen: ${company||'–'}\nOrt: ${location||'–'}\nAnliegen: ${topic}\n\n${message}`});return Response.json({message:'Anfrage gesendet.'});}catch{return Response.json({message:'Der Versand ist momentan nicht verfügbar.'},{status:500});}
 }

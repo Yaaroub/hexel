@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
-import fs from 'fs';
-import path from 'path';
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
+
 
 // next.config.mjs
 const nextConfig = {
+   // output: 'export',
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -22,4 +23,9 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Keep development output separate from production builds.
+export default (phase) => ({
+  ...nextConfig,
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next-dev' : '.next',
+});
+

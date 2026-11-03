@@ -1,0 +1,3 @@
+Logo asset: funknaht-mark-gold.png
+Created with the built-in Imagegen tool from the supplied FUNKNAHT brand sheet.
+Prompt: Isolate the existing flowing gold F symbol on transparent alpha; preserve the distinctive three-stroke silhouette, use muted champagne gold and crisp website-ready edges, remove lettering, panels, background and external shadows. One centered symbol, no redesign of the concept.

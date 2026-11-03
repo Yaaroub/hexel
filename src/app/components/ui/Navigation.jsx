@@ -1,164 +1,267 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState, useCallback, useRef } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 const links = [
-  { path: '/', name: 'Home' },
-  { path: '/services', name: 'Services' },
-  { path: '/metrics', name: 'Metrics Dashboard' },
-  { path: '/contact', name: 'Contact' }
+  { path: "/", name: "Home" },
+  { path: "/about", name: "About" },        // ✅ Added
+  { path: "/services", name: "Services" },
+  { path: "/projects", name: "Projects" },
+  { path: "/contact", name: "Contact" },
 ];
-
-const letters = 'Hexel Tech'.split('');
 
 export default function Navigation() {
   const path = usePathname();
-  const [mounted, setMounted] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const reduce = useReducedMotion();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // keep original body overflow to restore correctly
+  const prevOverflowRef = useRef("");
+
+  // close on route change
   useEffect(() => {
-    const timeout = setTimeout(() => setMounted(true), 300);
-    return () => clearTimeout(timeout);
+    setMobileMenuOpen(false);
+  }, [path]);
+
+  // body scroll lock (robust)
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      prevOverflowRef.current = document.body.style.overflow || "";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = prevOverflowRef.current;
+    }
+    return () => {
+      document.body.style.overflow = prevOverflowRef.current;
+    };
+  }, [mobileMenuOpen]);
+
+  // esc to close
+  const onKeyDown = useCallback((e) => {
+    if (e.key === "Escape") setMobileMenuOpen(false);
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileMenuOpen, onKeyDown]);
+
+  // scroll style
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const isActive = useCallback(
+    (href) => {
+      if (href === "/") return path === "/";
+      return path?.startsWith(href);
+    },
+    [path]
+  );
+
+  const navVariants = {
+    initial: { opacity: 0, y: reduce ? 0 : -6 },
+    animate: { opacity: 1, y: 0 },
+  };
+
   return (
-    <nav className="fixed top-0 w-full bg-gradient-to-r from-[#b29d88] to-[#47525d] backdrop-blur-md shadow-md z-50">
-      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between relative">
-        {/* Logo + Hexel Tech */}
-        <div className="flex items-center gap-2">
+    <motion.nav
+      variants={navVariants}
+      initial="initial"
+      animate="animate"
+      transition={{ duration: reduce ? 0.2 : 0.35 }}
+      className={[
+        "fixed top-0 w-full z-50",
+        "transition-all duration-300",
+        scrolled
+          ? "bg-white/80 backdrop-blur-xl border-b border-[#e0d7cf] shadow-sm"
+          : "bg-transparent",
+      ].join(" ")}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        {/* Brand */}
+        <Link href="/" className="flex items-center gap-3 group">
           {/* Logo */}
-          {/** Desktop: Logo with rotation animation */}
-          <Link href="/" className="flex-shrink-0">
-          <motion.div
-            className="hidden sm:block flex-shrink-0"
-            animate={mounted ? { rotate: 360 } : {}}
-            transition={{ 
-              delay: 1.5, 
-              duration: 1.5, 
-              repeat: Infinity,  
-              repeatDelay: 3,
-              repeatType: "reverse",
-              ease: "easeInOut" // oder "anticipate", "circOut", etc.
-            }}
-            >
+          <div className="relative w-9 h-9">
             <Image
               src="/images/x.png"
-              alt="Hexel Icon"
-              width={36}
-              height={36}
-              className="w-8 h-8 sm:w-10 sm:h-10"
-              />
-          </motion.div>
-              </Link>
-
-          {/** Mobile: Static Logo */}
-          <Link href="/" className="flex-shrink-0">
-          <motion.div
-            className="block sm:hidden flex-shrink-0"
-            animate={mounted ? { rotate: 360 } : {}}
-            transition={{ 
-              delay: 1.5, 
-              duration: 1.5, 
-              repeat: Infinity,
-              repeatDelay: 3,
-              repeatType: "reverse",
-              ease: "easeInOut" }}
-            >
-            <Image
-              src="/images/x.png"
-              alt="Hexel Icon"
-              width={36}
-              height={36}
-              className="w-8 h-8 sm:w-10 sm:h-10"
-              />
-          </motion.div>
-              </Link>
-
-          {/* Hexel Tech Text with Slide Animation */}
-          <div className="flex gap-[2px]">
-            {letters.map((char, index) => (
-              <motion.span
-                key={index}
-                initial={{ opacity: 0, y: -10 }}
-                animate={mounted ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
-                className={`text-white text-lg font-semibold ${
-                  char === 'x' ? 'text-[#47525d]' : ''
-                }`}
-              >
-                {char}
-              </motion.span>
-            ))}
+              alt="HEXEL"
+              fill
+              className="object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+              priority
+            />
           </div>
+
+          {/* Wordmark */}
+          <div className="leading-tight">
+            <div className="text-[#080706] font-semibold tracking-tight text-base">
+              HEXEL <span className="text-[#b29d88]">tech</span>
+            </div>
+            <div className="text-[11px] text-[#5d5247] tracking-[0.18em] uppercase">
+              Brand • Build • Scale
+            </div>
+          </div>
+        </Link>
+
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-full border border-[#e0d7cf] bg-white/70 backdrop-blur px-2 py-1">
+            {links.map((l) => {
+              const active = isActive(l.path);
+              return (
+                <Link
+                  key={l.path}
+                  href={l.path}
+                  aria-current={active ? "page" : undefined}
+                  className={[
+                    "relative px-3 py-2 rounded-full text-sm font-medium transition",
+                    active
+                      ? "text-[#080706] bg-[#f9f7f5] shadow-sm"
+                      : "text-[#5d5247] hover:text-[#080706] hover:bg-white",
+                  ].join(" ")}
+                >
+                  {l.name}
+                  {active && (
+                    <span className="absolute inset-x-3 -bottom-0.5 h-[2px] bg-[#b29d88] rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* CTA */}
+          <Link
+            href="/contact"
+            className="ml-3 inline-flex items-center justify-center rounded-xl bg-[#080706] text-white px-4 py-2 text-sm font-medium shadow-lg shadow-black/10 hover:opacity-90 transition"
+          >
+            Erstgespräch
+          </Link>
         </div>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex gap-6 lg:gap-8">
-          {links.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              className={`relative text-white hover:text-hexel-accent transition text-sm lg:text-base ${
-                link.path === path ? 'font-semibold' : 'font-medium'
-              }`}
-            >
-              {link.name}
-              {link.path === path && (
-                <motion.span
-                  layoutId="underline"
-                  className="absolute left-0 top-full h-[2px] w-full bg-hexel-accent"
-                  transition={{ type: 'spring', bounce: 0.3, duration: 0.5 }}
-                />
-              )}
-            </Link>
-          ))}
-        </div>
-
-        {/* Mobile Menu Icon */}
+        {/* Mobile toggle */}
         <button
-          className="md:hidden text-white focus:outline-none"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle Mobile Menu"
+          className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border border-[#e0d7cf] bg-white/80 backdrop-blur text-[#080706] hover:bg-white transition focus:outline-none focus:ring-2 focus:ring-[#b29d88]"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          aria-label={mobileMenuOpen ? "Menü schließen" : "Menü öffnen"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-nav"
+          type="button"
         >
-          {mobileMenuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-          )}
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d={mobileMenuOpen ? "M6 6L18 18" : "M4 7h16"}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d={mobileMenuOpen ? "" : "M4 12h16"}
+              className={mobileMenuOpen ? "opacity-0" : "opacity-100"}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d={mobileMenuOpen ? "M6 18L18 6" : "M4 17h16"}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
       </div>
 
-      {/* Mobile Links */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={mobileMenuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
-        className={`md:hidden px-4 pb-3 absolute w-full bg-gradient-to-b from-[#b29d88] to-[#47525d] transition-all duration-300 ease-in-out ${
-          mobileMenuOpen ? 'block' : 'hidden'
-        }`}
-      >
-        <div className="flex flex-col space-y-2 mt-2 p-4">
-          {links.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              className={`text-base text-white hover:text-hexel-accent transition ${
-                link.path === path ? 'font-semibold' : 'font-medium'
-              }`}
-              onClick={() => setMobileMenuOpen(false)} // Close menu on link click
+      {/* Mobile overlay + drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/35"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduce ? 0.15 : 0.2 }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            <motion.div
+              id="mobile-nav"
+              className="fixed top-16 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#e0d7cf] shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)]"
+              initial={{ opacity: 0, y: reduce ? 0 : -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduce ? 0 : -10 }}
+              transition={{ duration: reduce ? 0.15 : 0.2 }}
             >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-      </motion.div>
-    </nav>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
+                {/* Header inside drawer */}
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="text-sm font-semibold text-[#080706]">
+                    Navigation
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-[#5d5247] hover:text-[#080706] rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#b29d88]"
+                    type="button"
+                    aria-label="Menü schließen"
+                  >
+                    Schließen
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {links.map((l) => {
+                    const active = isActive(l.path);
+                    return (
+                      <Link
+                        key={l.path}
+                        href={l.path}
+                        aria-current={active ? "page" : undefined}
+                        className={[
+                          "flex items-center justify-between rounded-2xl px-4 py-3 transition border",
+                          active
+                            ? "bg-[#f9f7f5] text-[#080706] border-[#e0d7cf] shadow-sm"
+                            : "bg-white text-[#5d5247] border-[#e0d7cf] hover:bg-[#f9f7f5] hover:text-[#080706]",
+                        ].join(" ")}
+                      >
+                        <span className="font-medium">{l.name}</span>
+                        <span
+                          className={[
+                            "h-2 w-2 rounded-full",
+                            active ? "bg-[#b29d88]" : "bg-[#e0d7cf]",
+                          ].join(" ")}
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-5 pt-5 border-t border-[#e0d7cf]">
+                  <Link
+                    href="/contact"
+                    className="w-full inline-flex items-center justify-center rounded-2xl bg-[#080706] text-white px-4 py-3 font-medium shadow-lg shadow-black/10 hover:opacity-90 transition"
+                  >
+                    Erstgespräch buchen
+                  </Link>
+
+                  <p className="mt-4 text-xs text-[#5d5247] text-center tracking-[0.18em] uppercase">
+                    Brand • Build • Scale
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   );
 }
