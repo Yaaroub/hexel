@@ -4,6 +4,7 @@ import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
 // next.config.mjs
 const nextConfig = {
+  devIndicators: false,
    // output: 'export',
   eslint: {
     ignoreDuringBuilds: true,
@@ -28,4 +29,3 @@ export default (phase) => ({
   ...nextConfig,
   distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next-dev' : '.next',
 });
-

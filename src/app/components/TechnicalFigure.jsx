@@ -14,44 +14,30 @@ export default function TechnicalFigure({paused=false}){
     if(disposed||!host.current)return;
     const renderer=new T.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));
-    renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;
+    renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
     host.current.appendChild(renderer.domElement);
     const scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.1,30);
     camera.position.set(0,0,6.5);
     const pmrem=new T.PMREMGenerator(renderer),room=new RoomEnvironment();
     const environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;
     room.dispose();pmrem.dispose();
-    const key=new T.DirectionalLight('#fff1d6',3);key.position.set(-3,4,5);scene.add(key);
-    const rim=new T.DirectionalLight('#cfa263',2);rim.position.set(4,0,-2);scene.add(rim);
+    const key=new T.DirectionalLight('#fff6e5',2.2);key.position.set(-3,4,5);scene.add(key);
+    const rim=new T.DirectionalLight('#ccb28a',1.4);rim.position.set(4,0,-2);scene.add(rim);
     scene.add(new T.AmbientLight('#ffffff',.6));
     // Three clean curved bands traced from the supplied FUNKNAHT mark.
     const top=new T.Shape();top.moveTo(365,558);top.bezierCurveTo(470,392,565,238,755,238);top.lineTo(1220,238);top.lineTo(1110,352);top.bezierCurveTo(1065,402,1010,420,935,420);top.lineTo(650,420);top.bezierCurveTo(515,420,440,480,365,558);
     const seam=new T.Shape();seam.moveTo(23,1053);seam.lineTo(75,1053);seam.lineTo(319,676);seam.bezierCurveTo(380,583,465,549,572,549);seam.lineTo(974,549);seam.lineTo(1014,494);seam.lineTo(584,494);seam.bezierCurveTo(447,494,336,550,267,660);seam.closePath();
     const lower=new T.Shape();lower.moveTo(143,1053);lower.lineTo(251,1053);lower.bezierCurveTo(311,1053,354,1025,387,976);lower.lineTo(478,837);lower.bezierCurveTo(507,796,538,778,582,778);lower.lineTo(675,778);lower.bezierCurveTo(744,778,793,747,835,687);lower.lineTo(891,611);lower.lineTo(564,611);lower.bezierCurveTo(464,611,388,657,337,736);lower.closePath();
-    const geometry=new T.ExtrudeGeometry([top,seam,lower],{depth:42,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:4,bevelThickness:4,curveSegments:32});
+    const geometry=new T.ExtrudeGeometry([top,seam,lower],{depth:28,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:3,bevelThickness:3,curveSegments:32});
     geometry.center();geometry.scale(.0021,-.0021,.0021);geometry.computeVertexNormals();
-    const gold=new T.MeshStandardMaterial({color:'#d5b27d',metalness:.83,roughness:.3});
+    const gold=new T.MeshStandardMaterial({color:'#c6a777',metalness:.68,roughness:.4});
     const edge=new T.MeshStandardMaterial({color:'#a7793e',metalness:.85,roughness:.26});
     const sculpture=new T.Group();sculpture.add(new T.Mesh(geometry,[gold,edge]));scene.add(sculpture);
-    // A sparse spatial network shares the logo's centre, with the mark kept unobstructed.
-    const network=new T.Group();const vertices=[];
-    for(let ring=0;ring<2;ring++)for(let i=0;i<10;i++){
-     const a=i*Math.PI/5;vertices.push(new T.Vector3(Math.cos(a)*1.72,Math.sin(a)*1.18,(ring?1:-1)*.48));
-    }
-    const lines=[];for(let ring=0;ring<2;ring++)for(let i=0;i<10;i++){
-     lines.push(vertices[ring*10+i],vertices[ring*10+(i+1)%10]);if(!ring)lines.push(vertices[i],vertices[10+i]);
-    }
-    const lineGeometry=new T.BufferGeometry().setFromPoints(lines);
-    const lineMaterial=new T.LineBasicMaterial({color:'#b69a6d',transparent:true,opacity:.18});
-    network.add(new T.LineSegments(lineGeometry,lineMaterial));
-    const nodeGeometry=new T.BufferGeometry().setFromPoints(vertices);
-    const nodeMaterial=new T.PointsMaterial({color:'#dbc298',size:.035,transparent:true,opacity:.6});
-    network.add(new T.Points(nodeGeometry,nodeMaterial));scene.add(network);
     const preference=matchMedia('(prefers-reduced-motion: reduce)');
     let frame=0,time=0,last=0,visible=false;
     function draw(){
-     sculpture.rotation.set(-.09+Math.sin(time*.7)*.055,Math.sin(time)*.38,-.025);
-     network.rotation.set(.15,Math.sin(time)*.16,-.08);
+     sculpture.rotation.set(-.09+Math.sin(time*.7)*.055,Math.sin(time)*.19,-.025);
+
      renderer.render(scene,camera);
     }
     function tick(now){if(last&&now-last<32){frame=requestAnimationFrame(tick);return;}time+=last?Math.min(now-last,70)*.00023:0;last=now;draw();frame=requestAnimationFrame(tick)}
@@ -63,7 +49,7 @@ export default function TechnicalFigure({paused=false}){
     preference.addEventListener('change',sync);document.addEventListener('visibilitychange',sync);
     function contextLost(event){event.preventDefault();cancelAnimationFrame(frame);setReady(false)}
     renderer.domElement.addEventListener('webglcontextlost',contextLost);
-    cleanup=()=>{cancelAnimationFrame(frame);size.disconnect();observer.disconnect();preference.removeEventListener('change',sync);document.removeEventListener('visibilitychange',sync);renderer.domElement.removeEventListener('webglcontextlost',contextLost);geometry.dispose();gold.dispose();edge.dispose();lineGeometry.dispose();lineMaterial.dispose();nodeGeometry.dispose();nodeMaterial.dispose();environment.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null};
+    cleanup=()=>{cancelAnimationFrame(frame);size.disconnect();observer.disconnect();preference.removeEventListener('change',sync);document.removeEventListener('visibilitychange',sync);renderer.domElement.removeEventListener('webglcontextlost',contextLost);geometry.dispose();gold.dispose();edge.dispose();environment.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null};
     resize();setReady(true);
    }catch{if(!disposed)setReady(false)}
   }

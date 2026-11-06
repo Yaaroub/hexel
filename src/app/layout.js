@@ -1,16 +1,7 @@
 import './globals.css';
 import Link from 'next/link';
-import MotionDetails from './components/MotionDetails';
 import SiteNavigation from './components/SiteNavigation';
 import {siteUrl,organization,pageMetadata} from '../lib/seo';
-export const metadata = {...pageMetadata('FUNKNAHT | Netzwerkhilfe, Websites & Web-Apps', 'Netzwerkhilfe in Kreis Plön und Ostholstein. Dazu Websites, Web-Apps und Branding – FUNKNAHT verbindet Technik mit Menschen.', '/'), ...(siteUrl ? {metadataBase:new URL(siteUrl)} : {}), robots:{index:!!siteUrl,follow:!!siteUrl},manifest:'/site.webmanifest'};
-export const viewport = {width:'device-width',initialScale:1,themeColor:[{media:'(prefers-color-scheme: light)',color:'#f2efe8'},{media:'(prefers-color-scheme: dark)',color:'#171a18'}]};
-export default function Layout({children}) {return <html lang="de" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{__html:`try{var t=localStorage.getItem('funknaht-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}`}}/></head><body><MotionDetails/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org",...organization}).replace(/</g,"\\u003c")}}/><a className="skip" href="#inhalt">Zum Inhalt</a><SiteNavigation/><main id="inhalt">{children}</main><footer><Link className="wordmark" href="/"><span className="logo-mark" aria-hidden="true"/>FUNKNAHT</Link><p>Verbindet Technik mit Menschen.</p><Link href="/netzwerkhilfe">Netzwerkhilfe in Ihrer Region</Link><a href="/contact">Kontakt ↗</a><small>© {new Date().getFullYear()} FUNKNAHT</small></footer></body></html>}
-
-
-
-
-
-
-
-
+export const metadata={...pageMetadata('FUNKNAHT | Softwareentwicklung & Netzwerktechnik','FUNKNAHT entwickelt Websites und Webanwendungen. Netzwerkhilfe vor Ort im Kreis Plön und in Ostholstein. Einblicke in eigene Software: Pro Manager und Rental.','/'),...(siteUrl?{metadataBase:new URL(siteUrl)}:{}),robots:{index:!!siteUrl,follow:!!siteUrl},manifest:'/site.webmanifest'};
+export const viewport={width:'device-width',initialScale:1,themeColor:[{media:'(prefers-color-scheme: light)',color:'#e9ece6'},{media:'(prefers-color-scheme: dark)',color:'#171e1c'}]};
+export default function Layout({children}){return <html lang="de" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{__html:`try{var t=localStorage.getItem('funknaht-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}`}}/></head><body><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org',...organization}).replace(/</g,'\\u003c')}}/><a className="skip" href="#inhalt">Zum Inhalt</a><SiteNavigation/><main id="inhalt">{children}</main><footer className="site-footer"><div className="footer-main"><div><Link className="footer-brand" href="/"><img src="/funknaht-mark-gold.png" width="31" height="31" alt=""/>FUNKNAHT</Link><p>Softwareentwicklung. Netzwerktechnik.<br/>Technik mit Verbindung.</p></div><nav aria-label="Weiterführende Seiten"><Link href="/projects">Eigene Arbeiten ↗</Link><Link href="/#leistungen">Leistungen</Link><Link href="/#haltung">Zusammenarbeit</Link></nav><nav aria-label="Kontakt und Netzwerkhilfe"><Link href="/contact">Ein Vorhaben besprechen ↗</Link><Link href="/netzwerkhilfe">Netzwerkhilfe vor Ort</Link><Link href="/projects#marke">Marke & Gestaltung</Link></nav></div><div className="footer-meta"><span>© {new Date().getFullYear()} FUNKNAHT</span><span>Netzwerkhilfe: Kreis Plön & Ostholstein · Entwicklung: überregional</span></div></footer></body></html>}

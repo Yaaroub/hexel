@@ -1,7 +1,99 @@
 'use client';
-import {useEffect,useState} from 'react';
-import WorkspaceScene from '../components/WorkspaceScene';
-import {ArrowUpRight,CheckCircle2,MapPin} from 'lucide-react';
-export default function Contact(){const [topic,setTopic]=useState('');const [status,setStatus]=useState(null);const [busy,setBusy]=useState(false);useEffect(()=>{const value=new URLSearchParams(window.location.search).get('thema')||'';if(/netzwerk/i.test(value))setTopic('Netzwerk & WLAN');else if(/website/i.test(value))setTopic('Website');else if(/app|software|webanwendung/i.test(value))setTopic('Webanwendung');else if(/design|marke/i.test(value))setTopic('Marke & Design');},[]);async function submit(e){e.preventDefault();if(busy)return;const form=e.currentTarget;const data=Object.fromEntries(new FormData(form));setBusy(true);setStatus(null);try{const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!res.ok)throw new Error();setStatus({success:true,text:'Ihre Anfrage wurde gesendet. Vielen Dank für die Beschreibung Ihres Vorhabens.'});form.reset();setTopic('');}catch{setStatus({success:false,text:'Ihre Anfrage konnte nicht gesendet werden. Ihre Eingaben bleiben erhalten. Bitte versuchen Sie es später erneut.'});}finally{setBusy(false)}}return <section className="section contact contact-workspace"><div className="contact-intro"><p className="eyebrow">KONTAKT / DIREKT ZU FUNKNAHT</p><h1>Sie müssen kein<br/>Pflichtenheft schreiben.<br/><em>Eine Beschreibung reicht.</em></h1><p className="intro">Was soll anders werden? Vielleicht erklärt Ihre Website nicht mehr, was Ihr Betrieb heute anbietet. Vielleicht verteilen sich Aufgaben und Informationen auf zu viele Stellen. Oder Ihre Netzwerkverbindung macht Schwierigkeiten. Schreiben Sie, was Sie beobachten und welches Ergebnis Sie sich wünschen. Technische Begriffe brauchen Sie dafür nicht.</p><a className="text-link contact-form-shortcut" href="#anfrage">Direkt zum Anfrageformular <ArrowUpRight size={16}/></a><WorkspaceScene variant="contact"/><div className="contact-aside"><MapPin size={21}/><div><h2>Netzwerkhilfe vor Ort</h2><p>Kreis Plön & Ostholstein.<br/>Einsatz und Termin nach Absprache.</p></div></div><div className="contact-aside"><CheckCircle2 size={21}/><div><h2>Websites & Anwendungen</h2><p>Für Handwerksbetriebe, Praxen und andere Unternehmen – in der Region und überregional.</p></div></div><details className="inquiry-expectations"><summary>Was klären wir vor einer Beauftragung?</summary><p>Zuerst geht es um Ihre Ausgangslage und das gewünschte Ergebnis. Dazu gehören vorhandene Inhalte oder Systeme, notwendige Funktionen und offene Fragen.</p><ul><li>Welcher Umfang ist sinnvoll?</li><li>Welche Angaben fehlen für eine Einschätzung?</li><li>Welche Konditionen und nächsten Schritte passen dazu?</li></ul><p>Eine Anfrage allein ist noch keine Beauftragung.</p></details><p className="contact-note">Für eine erste Einschätzung helfen uns Ihr Ziel, der aktuelle Stand und ein gewünschter Zeitraum. Bitte keine Passwörter oder sensiblen Daten senden.</p></div><form id="anfrage" className="inquiry-panel" onSubmit={submit} aria-busy={busy}><div className="form-heading"><span>01 / IHRE ANFRAGE</span><small>* Pflichtfelder</small></div><fieldset disabled={busy}><legend>Wobei können wir unterstützen? *</legend><div className="topic-options">{['Netzwerk & WLAN','Website','Webanwendung','Marke & Design','Noch offen'].map(value=><label key={value}><input type="radio" name="topic" value={value} checked={topic===value} onChange={()=>setTopic(value)} required/><span>{value}</span></label>)}</div><div className="form-row"><label>Ihr Name *<input name="name" autoComplete="name" required maxLength={150} placeholder="Vor- und Nachname"/></label><label>E-Mail *<input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="name@unternehmen.de"/></label></div><div className="form-row"><label>Unternehmen<input name="company" autoComplete="organization" maxLength={150} placeholder="Optional"/></label><label>Ort / Postleitzahl {topic==='Netzwerk & WLAN'?'*':''}<input name="location" autoComplete="address-level2" required={topic==='Netzwerk & WLAN'} maxLength={150} placeholder={topic==='Netzwerk & WLAN'?'Wo wird Hilfe benötigt?':'Optional'}/></label></div><label>Was möchten Sie besprechen? *<textarea name="message" rows={6} required minLength={10} maxLength={5000} placeholder={topic==='Netzwerk & WLAN'?'Was funktioniert nicht? Welche Geräte sind betroffen?':'Was soll Ihre Website oder Anwendung ermöglichen?'} /></label><div className="form-bottom"><p>Ihre Angaben werden zur Bearbeitung Ihrer Anfrage übermittelt.</p><button className="button" disabled={busy}>{busy?'Wird gesendet …':'Anfrage senden'}<ArrowUpRight size={17}/></button></div></fieldset>{status&&<p className={'form-status '+(status.success?'success':'error')} role="status">{status.text}</p>}</form></section>}
 
+import {useEffect, useState} from 'react';
+import {ArrowUpRight, MapPin, Code2} from 'lucide-react';
+
+const topics = ['Netzwerk & WLAN', 'Website', 'Webanwendung', 'Marke & Design', 'Noch offen'];
+
+export default function Contact() {
+  const [topic, setTopic] = useState('');
+  const [status, setStatus] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get('thema') || '';
+    if (/netzwerk/i.test(value)) setTopic('Netzwerk & WLAN');
+    else if (/website/i.test(value)) setTopic('Website');
+    else if (/app|software|webanwendung/i.test(value)) setTopic('Webanwendung');
+    else if (/design|marke/i.test(value)) setTopic('Marke & Design');
+  }, []);
+
+  async function submit(event) {
+    event.preventDefault();
+    if (busy) return;
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
+    setBusy(true);
+    setStatus(null);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Send failed');
+      setStatus({success: true, text: 'Ihre Anfrage ist angekommen. Vielen Dank – wir melden uns über die angegebene E-Mail-Adresse.'});
+      form.reset();
+      setTopic('');
+    } catch {
+      setStatus({success: false, text: 'Der Versand hat gerade nicht funktioniert. Ihre Angaben bleiben im Formular. Bitte versuchen Sie es später erneut.'});
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const isNetwork = topic === 'Netzwerk & WLAN';
+
+  return <section className="section contact contact-workspace">
+    <div className="contact-intro">
+      <p className="page-kicker">KONTAKT / DER ERSTE SCHRITT</p>
+      <h1>Erzählen Sie uns,<br/>woran es gerade hakt.</h1>
+      <p className="contact-lead">Eine Idee für eine Anwendung. Eine Website, die nicht mehr zum Betrieb passt. Ein Netzwerk, das die Arbeit aufhält. Eine kurze Beschreibung genügt für den Anfang.</p>
+      <a className="text-link contact-form-shortcut" href="#anfrage">Zur Anfrage <ArrowUpRight size={16}/></a>
+
+    </div>
+
+    <form id="anfrage" className="inquiry-panel" onSubmit={submit} aria-busy={busy} aria-label="Anfrage an FUNKNAHT">
+      <div className="form-heading"><span>IHRE ANFRAGE</span><small>* Pflichtfeld</small></div>
+      <fieldset disabled={busy}>
+        <legend>Worum geht es? *</legend>
+        <div className="topic-options">
+          {topics.map(value => <label key={value}><input type="radio" name="topic" value={value} checked={topic === value} onChange={() => setTopic(value)} required/><span>{value}</span></label>)}
+        </div>
+        <div className="form-row">
+          <label>Ihr Name *<input name="name" autoComplete="name" required maxLength={150} placeholder="Vor- und Nachname"/></label>
+          <label>E-Mail *<input name="email" type="email" inputMode="email" autoComplete="email" required maxLength={254} placeholder="name@unternehmen.de"/></label>
+        </div>
+        <div className="form-row">
+          <label>Unternehmen <span className="field-optional">(optional)</span><input name="company" autoComplete="organization" maxLength={150}/></label>
+          <label>Ort / Postleitzahl {isNetwork ? '*' : <span className="field-optional">(optional)</span>}<input name="location" autoComplete="address-level2" required={isNetwork} maxLength={150} placeholder={isNetwork ? 'Wo wird Hilfe benötigt?' : ''}/></label>
+        </div>
+        <label>Was möchten Sie angehen? *<textarea name="message" rows={6} required minLength={10} maxLength={5000} aria-describedby="message-help" placeholder={isNetwork ? 'Welche Verbindung macht Schwierigkeiten? Seit wann, und welche Geräte sind betroffen?' : 'Beschreiben Sie Ihre Aufgabe, den aktuellen Stand und das gewünschte Ergebnis.'}/></label>
+        <p id="message-help" className="field-help">Mindestens 10 Zeichen. Bitte keine Passwörter oder sensiblen Daten eintragen.</p>
+        <div className="form-bottom">
+          <p>Ihre Angaben verwenden wir zur Bearbeitung Ihrer Anfrage. Eine Anfrage ist noch keine Beauftragung.</p>
+          <button className="button" type="submit" disabled={busy}>{busy ? 'Wird gesendet …' : 'Anfrage senden'}<ArrowUpRight size={17}/></button>
+        </div>
+      </fieldset>
+      {status && <p className={'form-status ' + (status.success ? 'success' : 'error')} role={status.success ? 'status' : 'alert'}>{status.text}</p>}
+    </form>
+
+    <div className="contact-notes">
+      <div className="contact-facts">
+        <div className="contact-fact"><MapPin size={20} strokeWidth={1.4}/><div><h2>Netzwerkhilfe vor Ort</h2><p>Im Kreis Plön und in Ostholstein. Nennen Sie uns Ihren Ort und die betroffenen Geräte; Einsatz und Termin stimmen wir gemeinsam ab.</p></div></div>
+        <div className="contact-fact"><Code2 size={20} strokeWidth={1.4}/><div><h2>Websites & Webanwendungen</h2><p>Für Betriebe, Praxen und andere Unternehmen – in der Umgebung und überregional. Auch mit einem bestehenden Projekt können Sie sich melden.</p></div></div>
+      </div>
+
+      <details className="inquiry-expectations">
+        <summary>Was hilft uns bei einer ersten Einschätzung?</summary>
+        <ul>
+          <li>Was soll sich für Sie oder Ihre Kunden verbessern?</li>
+          <li>Welche Website, Software oder Geräte gibt es bereits?</li>
+          <li>Gibt es einen gewünschten Zeitraum oder einen Budgetrahmen?</li>
+        </ul>
+        <p>Wenn Sie etwas noch nicht wissen, lassen Sie es offen. Umfang, Konditionen und die nächsten Schritte klären wir vor einer Beauftragung.</p>
+      </details>
+    </div>
+  </section>;
+}
 
