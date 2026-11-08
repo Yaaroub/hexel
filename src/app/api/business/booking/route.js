@@ -1,0 +1,12 @@
+import {getAvailability,publicBook,localParts,getDb} from '../../../../lib/business-db.js';
+import {assertMutationOrigin,readJson,jsonError,rateLimit,requesterKey} from '../../../../lib/business-auth.js';
+import {notify} from '../../../../lib/mailer.js';
+export const runtime='nodejs';export const dynamic='force-dynamic';
+const format=value=>new Intl.DateTimeFormat('de-DE',{dateStyle:'full',timeStyle:'short',timeZone:'Europe/Berlin'}).format(new Date(value));
+export async function GET(request){try{const query=new URL(request.url).searchParams;const key=requesterKey(request);rateLimit('availability:'+key,{limit:key==='direct'?600:120,windowMs:60000});const data=getAvailability({slug:query.get('slug'),date:query.get('date')||localParts(Date.now()).date,serviceId:query.get('serviceId')||undefined});return Response.json(data,{headers:{'Cache-Control':'no-store'}})}catch(error){return jsonError(error)}}
+export async function POST(request){try{assertMutationOrigin(request);const key=requesterKey(request);rateLimit('booking:'+key,{limit:key==='direct'?200:15,windowMs:3600000});const data=await readJson(request);const result=publicBook(data);
+ // Let the business know right away; the customer gets a receipt of the request.
+ const row=getDb().prepare('SELECT a.*,s.name AS service_name,o.name AS org_name,u.email AS owner_email FROM appointments a JOIN services s ON s.id=a.service_id JOIN organizations o ON o.id=a.organization_id LEFT JOIN users u ON u.organization_id=o.id WHERE a.id=?').get(result.id);
+ if(row){notify({to:row.owner_email,replyTo:row.customer_email||undefined,subject:'Neue Terminanfrage: '+row.service_name,text:`Neue Terminanfrage über Ihre Buchungsseite.\n\n${row.service_name}\n${format(row.starts_at)} Uhr\n\n${row.customer_name}\n${row.customer_email}${row.customer_phone?'\n'+row.customer_phone:''}${row.notes?'\n\nHinweis: '+row.notes:''}\n\nBestätigen oder absagen können Sie den Termin in Ihrem Arbeitsbereich unter „Termine“.`});
+  if(row.customer_email)notify({to:row.customer_email,subject:'Ihre Terminanfrage bei '+row.org_name,text:`Guten Tag ${row.customer_name},\n\nIhre Anfrage ist bei ${row.org_name} eingegangen:\n\n${row.service_name}\n${format(row.starts_at)} Uhr\n\nDer Termin ist noch nicht bestätigt. ${row.org_name} meldet sich bei Ihnen.\n\nDiese Nachricht wurde automatisch versendet.`})}
+ return Response.json(result,{status:201,headers:{'Cache-Control':'no-store'}})}catch(error){return jsonError(error)}}

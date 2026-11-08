@@ -1,0 +1,3 @@
+import {assertMutationOrigin,readJson,rateLimit,requesterKey,registerAccount,createSession,sessionCookie,getAccount,jsonError} from '../../../../lib/business-auth.js';
+export const runtime='nodejs';export const dynamic='force-dynamic';
+export async function POST(request){try{assertMutationOrigin(request);const key=requesterKey(request);rateLimit('register:'+key,{limit:key==='direct'?40:5});const data=await readJson(request);const {userId}=await registerAccount(data),token=createSession(userId);const account=getAccount(new Request(request.url,{headers:{cookie:sessionCookie(token)}}));return Response.json({account},{status:201,headers:{'Set-Cookie':sessionCookie(token),'Cache-Control':'no-store'}})}catch(error){return jsonError(error)}}

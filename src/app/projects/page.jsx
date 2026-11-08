@@ -1,32 +1,22 @@
 import Link from 'next/link';
+import {ArrowRight} from 'lucide-react';
 import Projects from '../components/Projects';
-import WorkspaceScene from '../components/WorkspaceScene';
 import {pageMetadata} from '../../lib/seo';
-
-export const metadata=pageMetadata(
-  'Eigene Software & Gestaltungsarbeiten | FUNKNAHT',
-  'Pro Manager und Rental: vollständig selbst entwickelte Webanwendungen. Originalansichten, Funktionen und das Gestaltungsarchiv von FUNKNAHT.',
-  '/projects'
-);
-
+export const metadata=pageMetadata('Arbeiten: Pro Manager und Rental | FUNKNAHT','Zwei vollständig selbst entwickelte Webanwendungen: Pro Manager für Aufgaben, Termine und Bestände, Rental für Unterkunftssuche und Vermieterverwaltung.','/projects');
 export default function ProjectPage(){
-  return <>
-    <section className="section page-intro">
-      <p className="page-kicker">FUNKNAHT / AUSGEWÄHLTE ARBEITEN</p>
-      <div className="page-heading-grid">
-        <div>
-          <h1>Software lässt sich<br/>am besten zeigen.</h1>
-          <p className="page-lead">Pro Manager und Rental sind vollständig selbst entwickelt. Hier geht es um die Aufgaben hinter den Oberflächen: Arbeit organisieren, Informationen pflegen und die passende Unterkunft finden.</p>
-          <a className="text-link" href="#projektarchiv">Originalansichten öffnen <span className="action-arrow down" aria-hidden="true">↓</span></a>
-        </div>
-        <WorkspaceScene variant="projects"/>
-      </div>
-      <div className="technical-note"><span>ENTWICKLUNG / GESTALTUNG / UMSETZUNG</span><p>Die gezeigten Ansichten stammen aus den eigenen Anwendungen. Das ergänzende Markenarchiv dokumentiert auch Arbeiten aus der Zeit vor dem Namenswechsel von HEXEL zu FUNKNAHT.</p></div>
-    </section>
-    <div id="projektarchiv"><Projects/></div>
-    <section className="section split-section">
-      <div><p className="section-label">VON DIESEN ARBEITEN ZU IHREM VORHABEN</p><h2 className="section-title">Welche Aufgabe<br/>soll Ihre Anwendung lösen?</h2></div>
-      <div><p>Vielleicht müssen Aufgaben und Zuständigkeiten an einem Ort zusammenkommen. Vielleicht sollen Kundinnen und Kunden Informationen selbst eingeben oder nach bestimmten Kriterien suchen. Der erste Schritt ist, diesen Ablauf in Ihren Worten zu beschreiben.</p><p>Wir klären, welche Daten dazugehören, wer damit arbeitet und was eine erste nutzbare Version können muss. Daraus entsteht ein Umfang, über den sich konkret sprechen lässt.</p><Link className="button" href="/contact?thema=Webanwendung">Eine Anwendung besprechen <span className="action-arrow" aria-hidden="true">↗</span></Link></div>
-    </section>
-  </>;
+ return <>
+  <section className="page-head">
+   <div className="wrap page-head__grid">
+    <div><p className="intro">Arbeiten</p><h1 className="display">Selbst entwickelt, bis ins Detail.</h1><p className="lead">Hier sehen Sie Originalansichten aus zwei eigenen Anwendungen und die Aufgaben dahinter: Arbeit organisieren, Bestände pflegen, Unterkünfte finden und verwalten.</p></div>
+    <div className="prose" style={{color:'var(--on-night-2)'}}><p>Jede Anwendung beginnt mit einer Frage: Wer arbeitet damit, und was soll danach schneller gehen? Daraus entstehen Datenmodell, Abläufe und erst dann die Oberfläche.</p><p style={{marginTop:16}}><Link className="link" href="/contact?thema=Webanwendung">Eigene Anwendung besprechen<ArrowRight size={16}/></Link></p></div>
+   </div>
+  </section>
+  <section className="band"><div className="wrap"><Projects/></div></section>
+  <section className="band band--night">
+   <div className="wrap closing">
+    <div><h2 className="display">Welche Aufgabe soll Ihre Software lösen?</h2><p className="lead">Beschreiben Sie den Ablauf in Ihren Worten. Wir klären, welche Daten dazugehören, wer damit arbeitet und was die erste Version können muss.</p></div>
+    <Link className="btn btn--light" href="/contact?thema=Webanwendung">Projekt anfragen<ArrowRight size={18}/></Link>
+   </div>
+  </section>
+ </>;
 }

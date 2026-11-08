@@ -1,45 +1,93 @@
 import Link from 'next/link';
-import WorkspaceScene from '../components/WorkspaceScene';
-import {regions,regionText,organization,pageMetadata} from '../../lib/seo';
+import {ArrowRight,Plus,Wifi,Router,MonitorSmartphone,Check} from 'lucide-react';
+import RegionChart from '../components/RegionChart';
+import ProcessSteps from '../components/ProcessSteps';
+import {organization,pageMetadata} from '../../lib/seo';
 
-export const metadata=pageMetadata('Netzwerkhilfe in Plön & Ostholstein | FUNKNAHT','WLAN-Probleme, Router-Einrichtung und Netzwerkhilfe im Kreis Plön und Ostholstein. Ausgangslage, Einsatz und Konditionen gemeinsam klären.','/netzwerkhilfe');
-const faqs=[
-  ['Wo bietet FUNKNAHT Netzwerkhilfe an?',`Das Vor-Ort-Gebiet umfasst ${regionText}. Nennen Sie Ihren Ort bei der Anfrage. Ob ein Einsatz möglich ist und welcher Termin passt, wird individuell vereinbart.`],
-  ['Bei welchen Problemen kann ich mich melden?','Zum Beispiel, wenn das WLAN an bestimmten Stellen ausfällt, Geräte keine Verbindung bekommen oder nach einem Routerwechsel etwas nicht mehr funktioniert. Wichtig sind die betroffenen Geräte und eine Beschreibung, wann der Fehler auftritt.'],
-  ['Was kostet die Netzwerkhilfe?','Der Aufwand hängt von der Ausgangslage, dem vereinbarten Umfang und gegebenenfalls der Anfahrt ab. Diese Konditionen werden vor der Beauftragung besprochen. Ein genauer Preis ohne Beschreibung des Problems wäre eine Vermutung.'],
-  ['Brauche ich einen neuen Router oder zusätzliche Geräte?','Das lässt sich erst nach einem Blick auf die vorhandene Einrichtung beurteilen. Routerstandort, betroffene Geräte und die Art der Verbindung gehören zur Einordnung. Beschreiben Sie zunächst das Verhalten, bevor Sie neue Hardware kaufen.'],
-  ['Was ist für die Anfrage hilfreich?','Ihr Ort, das Routermodell, die betroffenen Geräte und eine kurze Beschreibung. Hilfreich ist auch, ob das Problem nach einer Änderung begonnen hat. Passwörter oder Zugangsdaten gehören nicht in das Kontaktformular.'],
-  ['Ist FUNKNAHT das frühere HEXEL?','Ja. Aus HEXEL wurde FUNKNAHT. Die bisherigen Software- und Gestaltungsarbeiten gehören weiterhin zum Portfolio. Netzwerkhilfe ist ein weiterer Bereich des Angebots.']
+export const metadata=pageMetadata('Netzwerk- und WLAN-Hilfe im Kreis Plön und in Ostholstein | FUNKNAHT','WLAN-Probleme, Router-Einrichtung und kleine Firmennetze: FUNKNAHT hilft vor Ort im Kreis Plön und in Ostholstein. Termin, Anfahrt und Umfang klären wir vorher.','/netzwerkhilfe');
+
+const cases=[
+ {icon:Wifi,title:'WLAN und Reichweite',text:'Am Router ist das Netz stark, im Büro oder Obergeschoss kaum noch. Wir messen, wo es abbricht, und schlagen eine Lösung vor, die zu Ihrem Gebäude passt.'},
+ {icon:Router,title:'Router und Einrichtung',text:'Neuer Anschluss, neuer Router, und plötzlich fehlen Drucker, Kamera oder Kasse. Wir verbinden die Geräte wieder und erklären die wichtigen Einstellungen.'},
+ {icon:MonitorSmartphone,title:'Geräte und kleine Firmennetze',text:'Ein Gerät fällt immer wieder aus, oder das Netz ist über die Jahre gewachsen. Wir bringen Ordnung hinein und dokumentieren, was wo hängt.'},
 ];
-const services=[
-  {n:'01',title:'WLAN & Reichweite',lead:'Die Verbindung funktioniert am Router, aber am Arbeitsplatz kaum noch.',text:'Wir betrachten, wo das Problem auftritt und welche Geräte betroffen sind. Das hilft, zwischen einer Frage der Funkverbindung, einer Geräteeinstellung und einem anderen Fehler im Netzwerk zu unterscheiden.',points:['Standort und vorhandene Einrichtung betrachten','Unterschiede zwischen Räumen und Geräten einordnen','Sinnvolle Änderungen an der Ausgangslage besprechen']},
-  {n:'02',title:'Router & Einrichtung',lead:'Nach dem Wechsel ist das Internet da. Ein Teil der Geräte aber nicht.',text:'Ein neuer Router verändert die Einrichtung des Netzwerks. Wir unterstützen beim Verbinden der vorhandenen Geräte und bei den relevanten Einstellungen. Auch die Frage, welche Angaben oder Zugänge vor Ort gebraucht werden, klären wir im Gespräch.',points:['Routermodell und bisherige Einrichtung erfassen','Geräte wieder mit dem Netzwerk verbinden','Relevante Einstellungen nachvollziehbar erklären']},
-  {n:'03',title:'Geräte & Verbindungen',lead:'Ein Gerät fällt aus, während die anderen weiterarbeiten.',text:'Wir schauen auf die Verbindung zwischen dem betroffenen Gerät und dem lokalen Netzwerk. Seit wann besteht der Fehler? Tritt er ständig oder nur gelegentlich auf? Solche Beobachtungen geben der Fehlersuche eine Richtung.',points:['Betroffene Geräte und Verbindungsart einordnen','Änderungen und sichtbare Fehlermeldungen berücksichtigen','Nächste Schritte anhand der Beobachtungen klären']}
+const steps=[
+ ['Sie beschreiben das Problem','Was funktioniert nicht, seit wann, und welche Geräte sind betroffen? Am einfachsten über das Hilfe-Portal, dort führen Fragen durch die ersten Prüfschritte.'],
+ ['Wir schätzen den Aufwand ein','Sie erfahren vorab, ob ein Einsatz vor Ort sinnvoll ist und mit welchem Aufwand und welchen Kosten Sie rechnen können.'],
+ ['Termin vor Ort','Wir sehen uns die Einrichtung an, finden die Ursache und beheben sie, wenn möglich, direkt.'],
+ ['Sie wissen, was geändert wurde','Zum Schluss erklären wir, was wir verändert haben. Auf Wunsch schriftlich, damit es beim nächsten Mal schneller geht.'],
+];
+const faqs=[
+ ['Wo bieten Sie Netzwerkhilfe an?','Im Kreis Plön und in Ostholstein, zum Beispiel in Plön, Preetz, Lütjenburg, Schönberg, Eutin, Malente, Neustadt, Oldenburg, Heiligenhafen und auf Fehmarn. Nennen Sie bei der Anfrage Ihren Ort.'],
+ ['Was kostet ein Einsatz?','Das hängt vom Problem, vom Umfang und von der Anfahrt ab. Sie erhalten vorab eine Einschätzung und wissen, womit Sie rechnen müssen, bevor wir losfahren.'],
+ ['Brauche ich neue Hardware?','Oft nicht. Häufig liegt es am Standort, an Einstellungen oder an einem einzelnen Gerät. Kaufen Sie bitte nichts Neues, bevor wir uns die Einrichtung angesehen haben.'],
+ ['Was sollte ich für die Anfrage bereithalten?','Ihren Ort, das Routermodell, die betroffenen Geräte und eine kurze Beschreibung, wann der Fehler auftritt. Passwörter gehören nicht in das Formular; die klären wir vor Ort.'],
 ];
 
 export default function NetworkHelp(){
- const serviceSchema={'@context':'https://schema.org','@type':'Service',name:'Netzwerk- und WLAN-Hilfe',serviceType:'Netzwerkhilfe, WLAN-Fehlersuche und Router-Einrichtung',provider:organization,areaServed:organization.areaServed,description:metadata.description};
+ const schema={'@context':'https://schema.org','@type':'Service',name:'Netzwerk- und WLAN-Hilfe',serviceType:'Netzwerkhilfe, WLAN-Fehlersuche und Router-Einrichtung',provider:organization,areaServed:organization.areaServed,description:metadata.description};
  const faqSchema={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faqs.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))};
  return <>
-   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(serviceSchema).replace(/</g,'\\u003c')}}/>
-   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(faqSchema).replace(/</g,'\\u003c')}}/>
-   <section className="section page-intro">
-     <p className="page-kicker">FUNKNAHT / NETZWERK & WLAN</p>
-     <div className="page-heading-grid">
-       <div><h1>Verbindungen verstehen.<br/>Probleme eingrenzen.</h1><p className="page-lead">Das WLAN bricht ab. Ein Gerät kommt nicht ins Netz. Nach dem Routerwechsel funktioniert der Arbeitsplatz anders als vorher. FUNKNAHT unterstützt bei Netzwerkfragen vor Ort im Kreis Plön und in Ostholstein.</p><div className="region-tags">{regions.map(r=><span key={r}>{r}</span>)}</div><Link className="button" href="/contact?thema=Netzwerkhilfe">Netzwerkhilfe anfragen <span className="action-arrow" aria-hidden="true">↗</span></Link></div>
-       <WorkspaceScene variant="network"/>
-     </div>
-     <div className="technical-note"><span>VOR DEM TERMIN</span><p>Nennen Sie uns Ihren Ort, das betroffene Gerät und was Sie beobachten. Einsatz, Umfang und Konditionen werden vor der Beauftragung abgestimmt.</p></div>
-   </section>
-   <section className="section">
-     <div className="split-section"><div><p className="section-label">WOBEI WIR UNTERSTÜTZEN</p><h2 className="section-title">Erst beobachten.<br/>Dann etwas ändern.</h2></div><p>Ein Verbindungsfehler hat nicht immer dieselbe Ursache. Wir beginnen mit Ihrer vorhandenen Einrichtung und den Unterschieden zwischen funktionierenden und betroffenen Geräten. Drei typische Ausgangspunkte:</p></div>
-     <div className="service-rows">{services.map(s=><article className="service-row" key={s.n}><span className="section-label">{s.n}</span><div><h3>{s.title}</h3><p>{s.lead}</p></div><div><p>{s.text}</p><ul className="fact-list">{s.points.map(p=><li key={p}>{p}</li>)}</ul></div></article>)}</div>
-   </section>
-   <section className="section split-section">
-     <div><p className="section-label">REGIONAL VOR ORT</p><h2 className="section-title">Kreis Plön.<br/>Ostholstein.</h2></div>
-     <div><p>Für die Vor-Ort-Hilfe zählt der konkrete Standort. Schreiben Sie Ihren Ort bereits in die Anfrage, damit Einsatzmöglichkeit und Anfahrt gemeinsam geklärt werden können. Einen Termin vereinbaren wir passend zum Anliegen.</p><p>Wenn sich vor Ort eine andere Ausgangslage zeigt, wird auch der weitere Schritt besprochen. So bleibt nachvollziehbar, was geprüft wird und welche Änderung sinnvoll ist.</p><Link className="text-link" href="/contact?thema=Netzwerkhilfe">Anfrage mit Standort senden <span className="action-arrow" aria-hidden="true">↗</span></Link></div>
-   </section>
-   <section className="section faq"><p className="section-label">VOR DER ANFRAGE</p><h2 className="section-title">Was Sie wissen möchten.</h2>{faqs.map(([q,a])=><details key={q}><summary>{q}</summary><p>{a}</p></details>)}</section>
-   <section className="closing"><div className="section split-section"><div><p className="section-label">DER NÄCHSTE SCHRITT</p><h2 className="section-title">Was funktioniert<br/>bei Ihnen gerade nicht?</h2></div><div><p>Ein kurzer Überblick reicht für den Anfang: Ihr Ort, das betroffene Gerät und der Moment, in dem die Verbindung fehlt.</p><Link className="button" href="/contact?thema=Netzwerkhilfe">Problem beschreiben <span className="action-arrow" aria-hidden="true">↗</span></Link></div></div></section>
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(faqSchema).replace(/</g,'\\u003c')}}/>
+  <section className="page-head">
+   <div className="wrap page-head__grid">
+    <div>
+     <p className="intro">Netzwerkhilfe vor Ort</p>
+     <h1 className="display">Wenn das WLAN streikt, kommen wir vorbei.</h1>
+     <p className="lead">Für Haushalte, Büros, Praxen und Werkstätten im Kreis Plön und in Ostholstein. Wir suchen die Ursache, beheben sie und erklären, was wir getan haben.</p>
+     <div className="actions"><Link className="btn btn--light" href="/portal">Problem schildern<ArrowRight size={18}/></Link><Link className="btn btn--ghost" href="/contact?thema=Netzwerk">Direkt anfragen</Link></div>
+    </div>
+    <div className="slip" aria-label="Beispiel eines Einsatzes">
+     <div className="slip__head"><span>Einsatzbericht</span><img src="/funknaht-mark.png" alt="" width="22" height="22"/></div>
+     <dl>
+      <div><dt>Anliegen</dt><dd>WLAN im Büro bricht nachmittags ab</dd></div>
+      <div><dt>Ort</dt><dd>Werkstatt mit Büro, Kreis Plön</dd></div>
+      <div><dt>Was wir gefunden haben</dt><dd><ol>
+       <li><Check size={16}/>Nur das Büro betroffen, Werkstatt stabil</li>
+       <li><Check size={16}/>Router steht hinter einem Metallschrank</li>
+       <li><Check size={16}/>Zugangspunkt ergänzt, Empfang geprüft</li>
+      </ol></dd></div>
+     </dl>
+     <p className="slip__note">Beispielhafter Ablauf eines Einsatzes</p>
+     <span className="stamp" aria-hidden="true">ERLEDIGT</span>
+    </div>
+   </div>
+  </section>
+
+  <section className="band">
+   <div className="wrap">
+    <div className="section-head"><h2 className="h2 reveal">Typische Anliegen</h2><p className="lead reveal reveal-delay-1">Ihr Problem ist nicht dabei? Beschreiben Sie es trotzdem. Meist lässt sich schnell sagen, ob wir helfen können.</p></div>
+    <div className="cases">{cases.map(({icon:Icon,...c},i)=><article className={'case reveal reveal-delay-'+(i+1)} key={c.title}><Icon size={26} strokeWidth={1.6}/><h3 className="h3">{c.title}</h3><p>{c.text}</p></article>)}</div>
+   </div>
+  </section>
+
+  <section className="band band--stone">
+   <div className="wrap process">
+    <div><p className="intro">Ablauf</p><h2 className="h2">Von der Anfrage bis zur Übergabe.</h2><p className="prose" style={{marginTop:20}}>Bevor wir losfahren, wissen Sie, womit Sie rechnen können. Das spart Ihnen Geld und uns einen umsonst gefahrenen Weg.</p></div>
+    <ProcessSteps steps={steps}/>
+   </div>
+  </section>
+
+  <section className="band">
+   <div className="wrap region">
+    <div><p className="intro">Einsatzgebiet</p><h2 className="h2">Kreis Plön und Ostholstein.</h2><p className="prose" style={{marginTop:20}}>Von Heikendorf bis Fehmarn, von Preetz bis Bad Schwartau. Liegt Ihr Ort knapp außerhalb, fragen Sie gern nach.</p></div>
+    <RegionChart/>
+   </div>
+  </section>
+
+  <section className="band band--stone">
+   <div className="wrap faq">
+    <div><h2 className="h2">Fragen zur Netzwerkhilfe</h2></div>
+    <div>{faqs.map(([q,a])=><details key={q}><summary>{q}<Plus size={20}/></summary><p>{a}</p></details>)}</div>
+   </div>
+  </section>
+
+  <section className="band band--night">
+   <div className="wrap closing">
+    <div><h2 className="display">Erst eingrenzen, dann losfahren.</h2><p className="lead">Im Hilfe-Portal beantworten Sie ein paar Fragen. Oft löst sich das Problem schon dabei, sonst haben wir alle Angaben für den Einsatz.</p></div>
+    <Link className="btn btn--light" href="/portal">Zum Hilfe-Portal<ArrowRight size={18}/></Link>
+   </div>
+  </section>
  </>;
 }

@@ -1,13 +1,54 @@
-# Lokale Website FUNKNAHT
+# FUNKNAHT
 
-Die Vorschau läuft lokal. Entwicklung nutzt .next-dev, Produktionsbuilds .next.
+Website, Hilfe-Portal, Betriebsportal und Inhaberbereich. Next.js 15 mit React 19, SQLite über das in Node eingebaute `node:sqlite`.
 
-## Suchmaschinen-Konfiguration für eine spätere Veröffentlichung
+## Starten
 
-SITE_URL auf die bestätigte öffentliche HTTPS-Domain setzen und neu bauen. Erst damit werden Indexierung, absolute Canonical-URLs und Sitemap-Einträge aktiviert. Ohne SITE_URL bleiben robots.txt und Meta-Robots für die lokale Vorschau gesperrt.
+```powershell
+npm install          # entfernt dabei auch alte, nicht mehr benötigte Pakete
+npm run dev          # http://127.0.0.1:3000
+npm test             # 33 Tests: Konten, Buchung, Abrechnung, Portal, Inhaber und Datenschutz
+npm run build; npm start
+```
 
-Vor Veröffentlichung: Unternehmensadresse, Kontaktangaben, Impressum und Datenschutz bestätigen; Kontaktversand prüfen. Keine erfundenen Standorte oder Bewertungen ergänzen. Das regionale Einsatzgebiet ist Kreis Plön und Ostholstein.
+Node.js 22.13 oder neuer (empfohlen: 24). Konfiguration: `.env.example` nach `.env.local` kopieren und ausfüllen.
 
-Organization- und Service-Daten beschreiben die sichtbaren Inhalte. Eine LocalBusiness-Auszeichnung mit Adresse erst nach Bestätigung der tatsächlichen Geschäftsadresse ergänzen. Suchmaschinen- und KI-Platzierungen sind nicht garantiert.
+## Bereiche
 
+| Pfad | Für wen | Inhalt |
+|---|---|---|
+| `/` | Besucher | Startseite mit Code-Animation, Leistungen, Betriebsportal, Arbeiten, Ablauf, Einsatzgebiet |
+| `/netzwerkhilfe`, `/projects`, `/contact` | Besucher | Unterseiten |
+| `/impressum`, `/datenschutz` | Besucher | Rechtstexte; fehlende Angaben sind gelb markiert (`COMPANY_*` setzen) |
+| `/portal` | Alle | Geführte Prüfschritte, KI-Assistent, Übergabe an FUNKNAHT |
+| `/portal/werkstatt` | Kunden | Eigene Anfragen mit Antworten |
+| `/konto` | Alle | Anmelden, registrieren, **Daten herunterladen**, **Konto löschen** |
+| `/betrieb` | Betriebe | Termine, Kunden, Aufträge, Leistungen, Buchungsseite, Tarif |
+| `/buchen/[adresse]` | Endkunden | Öffentliche Terminbuchung eines Betriebs |
+| `/inhaber` | Inhaber | Kennzahlen, Anfragen beantworten, Konten, Protokoll, Datenschutz |
 
+## Inhaberbereich und Datenschutz
+
+- Zugang nur für Konten, deren E-Mail in `OWNER_EMAILS` steht, plus erneute Passworteingabe. Nach 30 Minuten wird automatisch gesperrt.
+- Kundenlisten, Termine und Aufträge der Betriebe sind für den Inhaber **nicht** einsehbar, nur ihre Anzahl (Auftragsverarbeitung nach Art. 28 DSGVO).
+- Private Konten erscheinen pseudonymisiert, E-Mail-Adressen maskiert.
+- Kontaktdaten in Anfragen werden erst beim Öffnen angezeigt. Öffnen, Statusänderung und Antwort werden protokolliert (`owner_audit`).
+- Aufbewahrung: Erledigte Anfragen werden nach 180 Tagen anonymisiert, das Protokoll nach 365 Tagen gelöscht, abgelaufene Sitzungen entfernt.
+- Nutzer exportieren ihre Daten (Art. 15/20) und löschen ihr Konto vollständig (Art. 17) unter `/konto`.
+- Schriften werden selbst gehostet, es gibt keine Tracking- oder Werbe-Cookies.
+
+## Benachrichtigungen
+
+Mit `EMAIL_USER`/`EMAIL_PASS` (Gmail-App-Passwort oder `SMTP_HOST`) werden versendet: Kontaktanfragen an `EMAIL_TO`, neue Portal-Anfragen an `EMAIL_TO` (ohne Details), neue Buchungen an den Betrieb und eine Eingangsbestätigung an den Endkunden, optional Antworten aus dem Inhaberbereich. Ohne Konfiguration läuft alles weiter, nur ohne E-Mails.
+
+## Sicherheit
+
+Passwörter mit scrypt; Sitzungs-Cookie HttpOnly, SameSite=Lax, in Produktion Secure; serverseitig wird nur ein Hash des Tokens gespeichert. Herkunftsprüfung bei allen schreibenden Anfragen, Begrenzung der Anfragen pro Zeit, Honeypot im Kontaktformular, Sicherheits-Header. IDs neuer Datensätze erzeugt nur der Server. Hinter einem Proxy `TRUST_PROXY=true` setzen, damit die Begrenzung pro IP greift.
+
+## Vor der Veröffentlichung
+
+1. `COMPANY_*` ausfüllen und Datenschutzerklärung rechtlich prüfen lassen (Hosting- und E-Mail-Anbieter ergänzen).
+2. `SITE_URL` und `APP_URL` auf die HTTPS-Domain setzen.
+3. `OWNER_EMAILS` setzen und das Inhaberkonto registrieren.
+4. `.local/` auf einen dauerhaften, gesicherten Datenträger legen (kein Serverless-Dateisystem) und regelmäßig sichern.
+5. Stripe zuerst im Testmodus einrichten. Preise: Basis 79 €/Monat, Betrieb 229 €/Monat.

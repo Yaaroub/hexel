@@ -1,27 +1,171 @@
 import Link from 'next/link';
-import {ArrowUpRight,ArrowDown,Code2,Network,PenTool} from 'lucide-react';
-import WorkspaceScene from './components/WorkspaceScene';
-const services=[
- {n:'01',icon:Code2,title:'Websites & Webanwendungen',intro:'Von der ersten Information bis zum täglichen Werkzeug.',text:'Eine Website muss Ihren Betrieb erklären. Eine Anwendung muss mit Ihren Daten und Abläufen zurechtkommen. Wir entwickeln beides – für Handwerksbetriebe, Praxen und Unternehmen, die eine konkrete Aufgabe digital lösen möchten.',items:['Websites mit klarer Struktur und direktem Kontakt','Individuelle Oberflächen für Daten und Arbeitsabläufe','Umfang, Pflege und spätere Erweiterungen gemeinsam planen'],href:'/contact?thema=Webanwendung',link:'Über eine Entwicklung sprechen'},
- {n:'02',icon:Network,title:'Netzwerk & WLAN',intro:'Die Verbindung beginnt bei der vorhandenen Technik.',text:'Ein neues Gerät ist selten der sinnvollste erste Schritt. Wir schauen darauf, wo eine Verbindung abbricht, welche Geräte betroffen sind und was sich verändert hat. Vor Ort im Kreis Plön und in Ostholstein.',items:['WLAN-Probleme nachvollziehbar eingrenzen','Router einrichten und Geräte verbinden','Einsatz, Anfahrt und Konditionen vorab abstimmen'],href:'/netzwerkhilfe',link:'Netzwerkhilfe im Detail'},
- {n:'03',icon:PenTool,title:'Marke & digitale Gestaltung',intro:'Ein erkennbarer Auftritt über alle Berührungspunkte.',text:'Name, Zeichen, Schrift und Oberfläche müssen zusammenpassen. Wir gestalten Markenauftritte und Printmaterialien und übersetzen sie ins Digitale. Bestehende Gestaltung betrachten wir dabei als Ausgangspunkt.',items:['Logo, Farbe und Typografie aufeinander abstimmen','Website und Geschäftsausstattung zusammen denken','Vorhandene Markenbestandteile bewusst weiterentwickeln'],href:'/projects#marke',link:'Gestaltungsarbeiten ansehen'}
-];
-const questions=[['Was kostet die Entwicklung?','Der Preis ergibt sich aus der Aufgabe. Vorhandene Inhalte, Funktionen, Daten und die spätere Pflege beeinflussen den Aufwand. Wir besprechen einen sinnvollen Umfang und die Konditionen, bevor Sie etwas beauftragen. Ein genannter Budgetrahmen hilft, die erste Version passend zu planen.'],['Wann ist eine eigene Anwendung sinnvoll?','Wenn Ihre Informationen und Arbeitsschritte eine eigene Oberfläche benötigen. Bevor individuell entwickelt wird, sollte klar sein, wo vorhandene Werkzeuge an ihre Grenzen kommen. Eine einfache Website oder ein bestehendes Werkzeug kann für manche Aufgaben bereits ausreichen.'],['Können bestehende Websites weiterverwendet werden?','Das hängt vom technischen Zustand, den verfügbaren Zugängen und dem gewünschten Ergebnis ab. Teilen Sie uns die Adresse und die Schwierigkeiten mit. Dann lässt sich klären, ob eine Überarbeitung oder ein neuer Aufbau sinnvoll ist.'],['Wer hat Pro Manager und Rental entwickelt?','Beide Anwendungen wurden vollständig selbst entwickelt. Die Projektseite zeigt ihre Originaloberflächen: von Aufgaben und Beständen bis zur Unterkunftssuche und den Verwaltungsbereichen.'],['Wie geht es nach der Fertigstellung weiter?','Wir klären während der Planung, wer Inhalte pflegt, welche Zugänge benötigt werden und wie spätere Änderungen ablaufen. Hosting und laufende Betreuung werden nach dem benötigten Umfang gesondert besprochen.']];
-export default function Home(){return <>
- <section className="section studio-hero">
-  <div className="hero-topline"><span>Softwareentwicklung × Netzwerktechnik</span><span>Schleswig-Holstein / Überregional</span></div>
-  <div className="hero-layout"><div className="hero-copy"><p className="page-kicker">FUNKNAHT — Technik mit Verbindung.</p><h1>Vom Netzwerk<br/>bis zur<br/><span>Anwendung.</span></h1><p className="hero-description">Websites, die Ihren Betrieb erklären. Anwendungen, die Ihre Arbeit zusammenführen. Netzwerke, auf die Ihre Geräte angewiesen sind.</p><div className="hero-actions"><Link className="button" href="/contact">Projekt besprechen<ArrowUpRight size={18}/></Link><a className="text-link" href="#anwendungen">Arbeiten entdecken<ArrowDown size={17}/></a></div></div><WorkspaceScene/></div>
-  <div className="hero-footnote"><p><span>Entwicklung</span>Websites & individuelle Software</p><p><span>Vor Ort</span>Kreis Plön & Ostholstein</p><p><span>Einblick</span>Pro Manager & Rental — selbst entwickelt</p></div>
- </section>
- <section className="work-section" id="anwendungen"><div className="section">
-  <div className="section-heading"><p className="section-label">01 / Aus eigener Entwicklung</p><div><h2>Die Arbeit dahinter.<br/><span>Die Oberfläche davor.</span></h2><p>Software wird verständlich, wenn man sie sieht. Zwei eigene Anwendungen zeigen, wie aus unterschiedlichen Aufgaben unterschiedliche Werkzeuge werden.</p></div><Link className="text-link" href="/projects">Alle Projektansichten<ArrowUpRight size={17}/></Link></div>
-  <article className="featured-work"><a className="work-visual pro-visual" href="/projects#pro-manager" aria-label="Pro Manager im Detail ansehen"><div className="visual-caption"><span>Pro Manager</span><span>Aufgaben / Übersicht</span></div><div className="screen-frame"><div className="screen-toolbar"><i/><i/><i/><span>Pro Manager / Arbeitsbereich</span></div><img src="/images/pro-manager/tasks.png" width="1336" height="649" alt="Originalansicht des Aufgabenboards in Pro Manager" loading="lazy"/></div><span className="image-link">Projekt öffnen<ArrowUpRight size={19}/></span></a><div className="work-copy"><p className="section-label">Anwendung 01 / Organisation</p><h3>Pro Manager</h3><p className="work-standfirst">Ein gemeinsamer Arbeitsplatz für Aufgaben, Termine und Bestände.</p><p>Was liegt an? Wer bearbeitet es? Und welche Informationen gehören dazu? Pro Manager führt Aufgaben, Produkte, Kalender und Notizen in einer Anwendung zusammen. Das Aufgabenboard macht Zuständigkeiten, Prioritäten und Bearbeitungsstände sichtbar.</p><dl className="project-facts"><div><dt>Aufgabe</dt><dd>Arbeit und Informationen zusammenführen</dd></div><div><dt>Umsetzung</dt><dd>Vollständig selbst entwickelt</dd></div></dl><Link className="text-link" href="/projects#pro-manager">Oberflächen & Funktionen<ArrowUpRight size={17}/></Link></div></article>
-  <article className="featured-work rental-work"><a className="work-visual rental-visual" href="/projects#rental" aria-label="Rental im Detail ansehen"><div className="visual-caption"><span>Rental</span><span>Suche / Verwaltung</span></div><div className="screen-frame"><div className="screen-toolbar"><i/><i/><i/><span>Rental / Unterkunftssuche</span></div><img src="/images/rental/finder.png" width="1336" height="750" alt="Originalansicht der Unterkunftssuche von Rental mit Suchfiltern" loading="lazy"/></div><span className="image-link">Projekt öffnen<ArrowUpRight size={19}/></span></a><div className="work-copy"><p className="section-label">Anwendung 02 / Vermietung</p><h3>Rental</h3><p className="work-standfirst">Eine Unterkunft finden. Und alles dahinter verwalten.</p><p>Gäste suchen nach Zeitraum, Ort und Ausstattung. Die Verwaltung arbeitet mit Objekten, Preisen, Bildern und Verfügbarkeiten. Rental bringt diese beiden Perspektiven zusammen – mit einer eigenen Oberfläche für jede Aufgabe.</p><dl className="project-facts"><div><dt>Aufgabe</dt><dd>Unterkunftssuche und Verwaltung verbinden</dd></div><div><dt>Umsetzung</dt><dd>Vollständig selbst entwickelt</dd></div></dl><Link className="text-link" href="/projects#rental">Suche & Verwaltung ansehen<ArrowUpRight size={17}/></Link></div></article>
- </div></section>
- <section className="section" id="leistungen"><div className="section-heading"><p className="section-label">02 / Was wir entwickeln und verbinden</p><div><h2>Eine Aufgabe.<br/><span>Der passende Ansatz.</span></h2><p>Für einen Betrieb, der sichtbar werden will. Für ein Team, das Informationen zusammenführen muss. Für einen Arbeitsplatz, an dem die Verbindung fehlt.</p></div></div><div className="service-rows">{services.map(({n,icon:Icon,title,intro,text,items,href,link})=><article className="service-row" key={n}><div className="service-identity"><span className="row-index">{n}</span><Icon size={25} strokeWidth={1.25}/></div><div><h3>{title}</h3><p className="service-intro">{intro}</p></div><div className="service-body"><p>{text}</p><ul>{items.map(item=><li key={item}>{item}</li>)}</ul><Link className="text-link" href={href}>{link}<ArrowUpRight size={17}/></Link></div></article>)}</div></section>
- <section className="method-section" id="haltung"><div className="section"><div className="section-heading"><p className="section-label">03 / Wie ein Projekt entsteht</p><div><h2>Erst verstehen.<br/><span>Dann entwickeln.</span></h2><p>Die ersten Entscheidungen fallen vor dem ersten Entwurf. Welche Aufgabe soll leichter werden? Welche Informationen werden gebraucht? Was gehört in die erste Version?</p></div></div><div className="method-grid">{[['01','Ausgangslage ansehen.','Wir betrachten vorhandene Inhalte, Systeme oder einen typischen Arbeitsablauf. Was funktioniert bereits? Wo entstehen Umwege? Welche Frage muss das Projekt beantworten?','Ergebnis: eine gemeinsame Aufgabenbeschreibung.'],['02','Den Umfang festlegen.','Wir trennen notwendige Funktionen von späteren Wünschen. Zuständigkeiten, Daten und Pflege gehören in diese Planung. So wird klar, was umgesetzt werden soll.','Ergebnis: ein nachvollziehbarer erster Umfang.'],['03','Entwickeln und prüfen.','Oberflächen und Funktionen werden an der vereinbarten Aufgabe gemessen. Auch Bedienung auf dem Smartphone, verständliche Eingaben und die Übergabe werden berücksichtigt.','Ergebnis: eine Umsetzung mit geklärten nächsten Schritten.']].map(([n,title,text,result])=><article key={n}><span className="method-number">{n}</span><h3>{title}</h3><p>{text}</p><p className="method-result">{result}</p></article>)}</div></div></section>
- <section className="section regional-home"><div><p className="section-label">04 / Netzwerkhilfe in Ihrer Region</p><h2>Die Technik steht bei Ihnen.<br/><span>Wir schauen vor Ort hin.</span></h2></div><div><p>WLAN im Nebenraum, ein neuer Router oder ein Gerät ohne Verbindung: Beschreiben Sie, wann der Fehler auftritt und was betroffen ist. FUNKNAHT unterstützt im Kreis Plön und in Ostholstein. Termin, Anfahrt und Umfang stimmen wir vorher ab.</p><div className="region-inline"><span>Kreis Plön</span><span>Ostholstein</span></div><Link className="text-link" href="/netzwerkhilfe">So beginnt die Fehlersuche<ArrowUpRight size={17}/></Link></div></section>
- <section className="section faq home-faq"><div><p className="section-label">05 / Vor dem ersten Gespräch</p><h2>Die Fragen<br/><span>gehören dazu.</span></h2><p>Ein Projekt braucht Klarheit über Aufwand, Umfang und die Zeit danach. Hier beginnen die Antworten.</p></div><div>{questions.map(([q,a])=><details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
- <section className="closing"><div className="section closing-inner"><div><p className="section-label">Der nächste Schritt / Kontakt</p><h2>Was soll für Sie<br/>besser funktionieren?</h2><p>Eine bestehende Website. Ein Arbeitsablauf. Ein Netzwerkproblem. Erzählen Sie uns, womit Sie gerade arbeiten und was sich ändern soll.</p></div><Link className="button" href="/contact">Vorhaben beschreiben<ArrowUpRight size={20}/></Link></div></section>
- </>}
+import {ArrowRight,LifeBuoy,Code2,CalendarCheck,HeartHandshake,Network,Workflow,Check,Plus,CalendarDays,Users,ClipboardList,Link2} from 'lucide-react';
+import Bench from './components/Bench';
+import AppMock from './components/AppMock';
+import ProcessSteps from './components/ProcessSteps';
+import RegionChart from './components/RegionChart';
 
+const paths=[
+ {icon:LifeBuoy,title:'Bei mir funktioniert etwas nicht.',text:'Im Hilfe-Portal grenzen Sie das Problem Schritt für Schritt ein. Reicht das nicht, übergeben Sie Ihre Angaben an uns.',go:'Zum Hilfe-Portal',href:'/portal'},
+ {icon:Code2,title:'Ich brauche eine Website oder Software.',text:'Beschreiben Sie Ihr Vorhaben. Wir klären gemeinsam, was die erste Version können muss und was sie kostet.',go:'Projekt anfragen',href:'/contact'},
+ {icon:CalendarCheck,title:'Mein Betrieb soll Termine online annehmen.',text:'Kunden buchen freie Zeiten selbst, Sie bestätigen mit einem Klick. Dazu Kunden und Aufträge an einem Ort.',go:'Betriebsportal ansehen',href:'#betriebe'},
+ {icon:HeartHandshake,title:'Meine Eltern brauchen Hilfe mit Handy und Banking.',text:'Wir erklären Smartphone, Online-Banking und Videoanrufe in Ruhe zu Hause, und schützen vor Betrugsmaschen.',go:'Digitalhilfe für Senioren',href:'/senioren'},
+];
+
+const services=[
+ {id:'software',icon:Code2,title:'Websites und Webanwendungen',text:'Eine Website, die Ihren Betrieb in zwei Sätzen erklärt. Eine Anwendung, die einen Arbeitsablauf abbildet, statt ihn mit Tabellen und Zetteln zu umgehen. Wir entwickeln selbst, vom Datenmodell bis zur Oberfläche, und übergeben Software, die Sie verstehen und weiter betreiben können.',points:['Websites mit klarer Struktur, schnell und auf dem Smartphone gut bedienbar','Webanwendungen für Buchung, Verwaltung, Kundenportale und interne Abläufe','Bestehende Systeme übernehmen, aufräumen und gezielt erweitern'],tags:['Next.js','React','Node.js','Prisma','SQL']},
+ {id:'it',icon:Network,title:'IT und Netzwerke vor Ort',text:'Das WLAN reicht nicht bis ins Büro, nach dem Routerwechsel fehlen Geräte, der Drucker ist plötzlich nicht mehr erreichbar. Im Kreis Plön und in Ostholstein kommen wir vorbei, sehen uns die Einrichtung an und erklären, was wir verändern.',points:['WLAN-Abdeckung prüfen und gezielt verbessern','Router, Zugangspunkte und Geräte einrichten','Kleine Firmennetze strukturiert aufbauen und dokumentieren'],tags:['Kreis Plön','Ostholstein'],link:['Mehr zur Netzwerkhilfe','/netzwerkhilfe']},
+ {id:'ki',icon:Workflow,title:'KI und Automatisierung',text:'Daten werden dreimal abgetippt, Anfragen von Hand sortiert, Rechnungen nachgetragen. Wir schauen uns an, welche Schritte sich sinnvoll automatisieren lassen, und wo KI hilft oder nur Kosten verursacht.',points:['Wiederkehrende Abläufe gemeinsam erfassen','Schnittstellen zwischen vorhandenen Programmen bauen','KI dort einsetzen, wo das Ergebnis kontrollierbar bleibt'],tags:['Schnittstellen','Automatisierung','KI-Assistenz']},
+];
+
+const steps=[
+ ['Sie schildern Ihr Anliegen','Über das Kontaktformular oder das Hilfe-Portal. Ein paar Sätze reichen: Was soll besser funktionieren, und was ist schon vorhanden?'],
+ ['Wir klären den Umfang','Im Gespräch trennen wir Notwendiges von Wünschen für später. Sie wissen danach, was die erste Version leisten soll.'],
+ ['Sie erhalten ein klares Angebot','Mit Umfang, Zeitrahmen und Preis. Erst wenn alles für Sie stimmt, geht es los.'],
+ ['Umsetzung mit Zwischenständen','Sie sehen früh, was entsteht, und können eingreifen. Zum Schluss gibt es eine Übergabe, bei der wir alles erklären.'],
+];
+
+const questions=[
+ ['Muss ich das Portal nutzen, um Sie zu beauftragen?','Nein. Websites, Software und Netzwerkhilfe können Sie direkt über das Kontaktformular anfragen. Das Portal ist ein zusätzlicher Weg, technische Probleme selbst einzugrenzen oder mit allen Angaben an uns zu übergeben.'],
+ ['Was kostet eine Website oder Anwendung?','Das hängt vom Umfang ab: Inhalte, Funktionen, Anbindungen und spätere Pflege. Nach einem ersten Gespräch erhalten Sie ein Angebot mit festem Umfang. Eine Pauschale ohne Kenntnis der Aufgabe wäre geraten.'],
+ ['Wo bieten Sie Hilfe vor Ort an?','Im Kreis Plön und in Ostholstein, etwa in Plön, Preetz, Lütjenburg, Eutin, Neustadt oder auf Fehmarn. Digitale Projekte setzen wir deutschlandweit um.'],
+ ['Wie gehen Sie mit meinen Daten um?','Wir speichern nur, was für Ihr Anliegen nötig ist. Die Kundendaten im Betriebsportal gehören Ihrem Betrieb; wir sehen sie nicht ein. Sie können Ihre Daten jederzeit herunterladen oder Ihr Konto löschen.'],
+ ['Kann ich das Betriebsportal kündigen?','Das Abonnement läuft monatlich. Sie verwalten und kündigen es selbst unter „Tarif & Abrechnung“ in Ihrem Arbeitsbereich.'],
+];
+
+export default function Home(){
+ return <>
+  <section className="hero">
+   <div className="wrap">
+    <div className="hero__grid">
+     <div>
+      <h1 className="display">Software, die Ihren Arbeitstag leichter macht.</h1>
+      <p className="lead">FUNKNAHT entwickelt Websites und Webanwendungen, richtet Netzwerke ein und bringt Abläufe in Ordnung. Für Betriebe und Haushalte im Kreis Plön, in Ostholstein und überall dort, wo Software gebraucht wird.</p>
+      <div className="actions"><Link className="btn btn--light" href="/contact">Projekt anfragen<ArrowRight size={18}/></Link><Link className="btn btn--ghost" href="/portal">Technisches Problem schildern</Link></div>
+     </div>
+     <Bench/>
+    </div>
+    <dl className="hero__facts">
+     <div><dt>Selbst entwickelt</dt><dd>Vom Datenmodell bis zur Oberfläche, ohne Baukasten.</dd></div>
+     <div><dt>Vor Ort</dt><dd>Netzwerkhilfe im Kreis Plön und in Ostholstein.</dd></div>
+     <div><dt>Hilfe-Portal</dt><dd>Anliegen jederzeit erfassen und Schritt für Schritt eingrenzen.</dd></div>
+    </dl>
+   </div>
+  </section>
+
+  <section className="band" aria-labelledby="wege">
+   <div className="wrap">
+    <div className="section-head"><h2 id="wege" className="h2 reveal">Womit können wir helfen?</h2><p className="lead reveal reveal-delay-1">Wählen Sie den Weg, der zu Ihrem Anliegen passt. Wenn Sie unsicher sind, schreiben Sie uns einfach.</p></div>
+    <ul className="paths">{paths.map(({icon:Icon,...p},i)=><li className={'path reveal reveal-delay-'+Math.min(i+1,3)} key={p.title}><Link href={p.href}><span className="path__icon"><Icon size={22}/></span><h3>{p.title}</h3><p>{p.text}</p><span className="path__go">{p.go}<ArrowRight size={17}/></span></Link></li>)}</ul>
+   </div>
+  </section>
+
+  <section className="band band--stone" id="leistungen" aria-labelledby="leistungen-titel">
+   <div className="wrap services">
+    <div className="services__aside">
+     <p className="intro">Leistungen</p>
+     <h2 id="leistungen-titel" className="h2">Entwicklung und Technik aus einer Hand.</h2>
+     <div className="prose"><p>Software endet nicht am Bildschirm. Sie läuft auf Geräten, in Netzwerken und in den Abläufen eines Betriebs. Deshalb betrachten wir beides: den Code und die Umgebung, in der er arbeitet.</p></div>
+     <div className="actions" style={{marginTop:28}}><Link className="btn" href="/contact">Vorhaben besprechen<ArrowRight size={18}/></Link></div>
+    </div>
+    <div>{services.map(({icon:Icon,...s})=><article className="service reveal" id={s.id} key={s.id}>
+     <div className="service__title"><Icon size={26} strokeWidth={1.6}/><h3 className="h3">{s.title}</h3></div>
+     <p className="prose">{s.text}</p>
+     <ul>{s.points.map(p=><li key={p}>{p}</li>)}</ul>
+     <div className="service__tags">{s.tags.map(t=><span className="tag" key={t}>{t}</span>)}</div>
+     {s.link&&<p style={{marginTop:18}}><Link className="link" href={s.link[1]}>{s.link[0]}<ArrowRight size={16}/></Link></p>}
+    </article>)}</div>
+   </div>
+  </section>
+
+  <section className="band band--night" id="betriebe" aria-labelledby="betriebe-titel">
+   <div className="wrap">
+    <div className="product">
+     <div>
+      <p className="intro">Betriebsportal</p>
+      <h2 id="betriebe-titel" className="display">Termine, Kunden und Aufträge an einem Ort.</h2>
+      <p className="lead" style={{marginTop:22}}>Für Handwerk, Praxen und Dienstleister, die Anfragen nicht mehr auf Zetteln und in drei Postfächern verwalten wollen.</p>
+      <ul className="feature-list">
+       <li><Link2 size={20}/><div><strong>Eigene Buchungsseite</strong><span>Kunden wählen Leistung und freie Zeit. Doppelbuchungen sind ausgeschlossen.</span></div></li>
+       <li><CalendarDays size={20}/><div><strong>Termine bestätigen</strong><span>Neue Anfragen erscheinen sofort, Sie werden per E-Mail benachrichtigt.</span></div></li>
+       <li><Users size={20}/><div><strong>Kundenkartei</strong><span>Kontakte und Notizen, nur für Ihren Betrieb sichtbar.</span></div></li>
+       <li><ClipboardList size={20}/><div><strong>Aufträge</strong><span>Vom Angebot bis zur Erledigung, mit Wert und Bearbeitungsstand.</span></div></li>
+      </ul>
+     </div>
+     <AppMock/>
+    </div>
+    <div className="pricing reveal">
+     <div className="price"><h3>Basis</h3><p className="price__amount">79 €<small>pro Monat</small></p><ul><li><Check size={16}/>Buchungsseite und Terminkalender</li><li><Check size={16}/>Bis zu 10 Kunden und 20 Termine im Monat</li><li><Check size={16}/>Bis zu 10 Leistungen</li><li><Check size={16}/>KI-Assistent im Hilfe-Portal</li></ul><Link className="btn btn--light" href="/konto?typ=betrieb">Konto anlegen</Link></div>
+     <div className="price price--focus"><h3>Betrieb</h3><p className="price__amount">229 €<small>pro Monat</small></p><ul><li><Check size={16}/>Alles aus Basis</li><li><Check size={16}/>Auftragsverwaltung</li><li><Check size={16}/>Bis zu 500 Kunden und Termine im Monat</li><li><Check size={16}/>Bis zu 100 Leistungen</li></ul><Link className="btn btn--light" href="/konto?typ=betrieb">Konto anlegen</Link></div>
+     <div className="price"><h3>Individuell</h3><p className="price__amount">Nach Absprache</p><ul><li><Plus size={16}/>Eigene Abläufe und Felder</li><li><Plus size={16}/>Anbindung an vorhandene Software</li><li><Plus size={16}/>Mehrere Standorte</li></ul><Link className="link" href="/contact?thema=Betriebsportal">Umfang besprechen<ArrowRight size={16}/></Link></div>
+    </div>
+    <p className="small" style={{marginTop:18,color:'var(--on-night-2)'}}>Das Konto ist kostenlos. Ein Tarif wird erst mit Abschluss der Zahlung aktiv und lässt sich monatlich selbst verwalten.</p>
+   </div>
+  </section>
+
+  <section className="band" id="arbeiten" aria-labelledby="arbeiten-titel">
+   <div className="wrap">
+    <div className="section-head"><div><p className="intro reveal">Eigene Arbeiten</p><h2 id="arbeiten-titel" className="h2 reveal">Software zeigt man am besten.</h2></div><p className="lead reveal reveal-delay-1">Zwei Anwendungen, vollständig selbst entwickelt. Unterschiedliche Aufgaben, jeweils mit eigener Oberfläche für die Menschen, die damit arbeiten.</p></div>
+    <article className="work">
+     <div className="work__visual reveal">
+      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Pro Manager – Aufgaben</span></div><img src="/images/pro-manager/tasks.png" width="1336" height="649" alt="Aufgabenboard von Pro Manager mit Spalten für Bearbeitungsstände" loading="lazy"/></div>
+      <div className="frame frame--back"><div className="frame__bar"><i/><i/><i/></div><img src="/images/pro-manager/dashboard.png" width="1336" height="649" alt="" loading="lazy"/></div>
+     </div>
+     <div className="reveal reveal-delay-1">
+      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Pro Manager</h3>
+      <p className="prose">Aufgaben, Termine, Produktbestände und Notizen in einer Anwendung. Das Board zeigt Zuständigkeiten, Prioritäten und Fälligkeiten; Sprints und Grenzen für laufende Arbeit bilden auch größere Vorhaben ab.</p>
+      <div className="work__meta"><span className="tag">Organisation</span><span className="tag">Kanban und Sprints</span><span className="tag">Bestandsführung</span></div>
+      <Link className="link" href="/projects#pro-manager">Alle Ansichten<ArrowRight size={16}/></Link>
+     </div>
+    </article>
+    <article className="work work--flip">
+     <div className="work__visual reveal">
+      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Rental – Unterkunftssuche</span></div><img src="/images/rental/finder.png" width="1336" height="750" alt="Suchoberfläche von Rental mit Filtern für Zeitraum, Ort und Ausstattung" loading="lazy"/></div>
+      <div className="frame frame--back"><div className="frame__bar"><i/><i/><i/></div><img src="/images/rental/admin.png" width="1336" height="750" alt="" loading="lazy"/></div>
+     </div>
+     <div className="reveal reveal-delay-1">
+      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Rental</h3>
+      <p className="prose">Gäste suchen nach Zeitraum, Ort und Ausstattung. Vermieter pflegen Objekte, Preiszeiten, Nebenkosten und Verfügbarkeiten, inklusive Kalenderabgleich per iCal.</p>
+      <div className="work__meta"><span className="tag">Ferienvermietung</span><span className="tag">Verfügbarkeiten</span><span className="tag">Verwaltungsbereich</span></div>
+      <Link className="link" href="/projects#rental">Suche und Verwaltung ansehen<ArrowRight size={16}/></Link>
+     </div>
+    </article>
+   </div>
+  </section>
+
+  <section className="band band--stone" id="ablauf" aria-labelledby="ablauf-titel">
+   <span id="haltung" aria-hidden="true"/>
+   <div className="wrap process">
+    <div><p className="intro">Zusammenarbeit</p><h2 id="ablauf-titel" className="h2">So wird aus einer Idee ein Werkzeug.</h2><p className="prose" style={{marginTop:20}}>Sie müssen keine technischen Begriffe kennen. Wichtig ist, was Ihnen im Alltag Zeit kostet. Den Rest übersetzen wir.</p></div>
+    <ProcessSteps steps={steps}/>
+   </div>
+  </section>
+
+  <section className="band" aria-labelledby="region-titel">
+   <div className="wrap region">
+    <div>
+     <p className="intro">Einsatzgebiet</p>
+     <h2 id="region-titel" className="h2">Vor Ort zwischen Kieler Förde und Fehmarn.</h2>
+     <p className="prose" style={{marginTop:20}}>Für Netzwerkhilfe kommen wir zu Ihnen, ins Büro, in die Werkstatt oder nach Hause. Termin, Anfahrt und Umfang stimmen wir vorher ab. Software und Websites entwickeln wir für Kunden in ganz Deutschland.</p>
+     <div className="region__list"><span className="tag">Kreis Plön</span><span className="tag">Ostholstein</span><span className="tag">Digital: deutschlandweit</span></div>
+     <p style={{marginTop:26}}><Link className="link" href="/netzwerkhilfe">So läuft ein Einsatz ab<ArrowRight size={16}/></Link></p>
+    </div>
+    <RegionChart/>
+   </div>
+  </section>
+
+  <section className="band band--stone" id="fragen" aria-labelledby="fragen-titel">
+   <div className="wrap faq">
+    <div><h2 id="fragen-titel" className="h2">Häufige Fragen</h2><p className="prose" style={{marginTop:16}}>Ihre Frage ist nicht dabei? <Link className="link" href="/contact">Schreiben Sie uns.</Link></p></div>
+    <div>{questions.map(([q,a])=><details key={q}><summary>{q}<Plus size={20}/></summary><p>{a}</p></details>)}</div>
+   </div>
+  </section>
+
+  <section className="band band--night">
+   <div className="wrap closing">
+    <div><h2 className="display">Was soll bei Ihnen besser laufen?</h2><p className="lead">Eine Website, die nicht mehr passt. Ein Ablauf, der Zeit frisst. Ein Netzwerk, das streikt. Erzählen Sie uns davon.</p></div>
+    <Link className="btn btn--light" href="/contact">Projekt anfragen<ArrowRight size={18}/></Link>
+   </div>
+  </section>
+ </>;
+}
