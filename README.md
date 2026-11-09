@@ -7,7 +7,7 @@ Website, Hilfe-Portal, Betriebsportal und Inhaberbereich. Next.js 15 mit React 1
 ```powershell
 npm install          # entfernt dabei auch alte, nicht mehr benötigte Pakete
 npm run dev          # http://127.0.0.1:3000
-npm test             # 33 Tests: Konten, Buchung, Abrechnung, Portal, Inhaber und Datenschutz
+npm test             # Tests: Konten, Buchung, Abrechnung, Portal, Inhaber, Belege, Überwachung, Datenschutz
 npm run build; npm start
 ```
 
@@ -20,12 +20,18 @@ Node.js 22.13 oder neuer (empfohlen: 24). Konfiguration: `.env.example` nach `.e
 | `/` | Besucher | Startseite mit Code-Animation, Leistungen, Betriebsportal, Arbeiten, Ablauf, Einsatzgebiet |
 | `/netzwerkhilfe`, `/projects`, `/contact` | Besucher | Unterseiten |
 | `/impressum`, `/datenschutz` | Besucher | Rechtstexte; fehlende Angaben sind gelb markiert (`COMPANY_*` setzen) |
-| `/portal` | Alle | Geführte Prüfschritte, KI-Assistent, Übergabe an FUNKNAHT |
-| `/portal/werkstatt` | Kunden | Eigene Anfragen mit Antworten |
+| `/portal` | Alle | Geführte Prüfschritte, „Ist das Betrug?“-Check, KI-Assistent, Rückrufwunsch, Übergabe an FUNKNAHT |
+| `/hilfe` | Alle | Wissensdatenbank mit Schritt-für-Schritt-Hilfen |
+| `/senioren` | Besucher | Digitalhilfe für Ältere mit Rückrufwunsch |
+| `/portal/werkstatt` | Kunden | Anfragen, Geräte, Belege, Überwachung, Familie, Team |
+| `/termin/[schlüssel]` | Endkunden | Termin ansehen, absagen, in den Kalender übernehmen |
+| `/einladung/[schlüssel]` | Eingeladene | Familien- oder Team-Einladung annehmen |
+| `/h/[schlüssel]` | Kunden | Ziel des QR-Aufklebers am Gerät |
+| `/beleg/[id]` | Kunde, Inhaber | Angebot oder Rechnung, druckfertig |
 | `/konto` | Alle | Anmelden, registrieren, **Daten herunterladen**, **Konto löschen** |
 | `/betrieb` | Betriebe | Termine, Kunden, Aufträge, Leistungen, Buchungsseite, Tarif |
 | `/buchen/[adresse]` | Endkunden | Öffentliche Terminbuchung eines Betriebs |
-| `/inhaber` | Inhaber | Kennzahlen, Anfragen beantworten, Konten, Protokoll, Datenschutz |
+| `/inhaber` | Inhaber | Anfragen, Rückrufe, Kundenakten (Geräte, QR, Überwachung), Belege, Zeiten, Störungshinweise, Einstellungen, Protokoll |
 
 ## Inhaberbereich und Datenschutz
 
@@ -36,6 +42,10 @@ Node.js 22.13 oder neuer (empfohlen: 24). Konfiguration: `.env.example` nach `.e
 - Aufbewahrung: Erledigte Anfragen werden nach 180 Tagen anonymisiert, das Protokoll nach 365 Tagen gelöscht, abgelaufene Sitzungen entfernt.
 - Nutzer exportieren ihre Daten (Art. 15/20) und löschen ihr Konto vollständig (Art. 17) unter `/konto`.
 - Schriften werden selbst gehostet, es gibt keine Tracking- oder Werbe-Cookies.
+
+## Zeitplan
+
+`POST /api/cron` mit `Authorization: Bearer $CRON_SECRET` alle 5 Minuten aufrufen. Dann laufen Terminerinnerungen (Vortag), Website- und SSL-Prüfung, Lebenszeichen der Router und die Datenbereinigung. Auf dem Server erledigt das `deploy/funknaht-cron.timer`.
 
 ## Benachrichtigungen
 
@@ -50,5 +60,5 @@ Passwörter mit scrypt; Sitzungs-Cookie HttpOnly, SameSite=Lax, in Produktion Se
 1. `COMPANY_*` ausfüllen und Datenschutzerklärung rechtlich prüfen lassen (Hosting- und E-Mail-Anbieter ergänzen).
 2. `SITE_URL` und `APP_URL` auf die HTTPS-Domain setzen.
 3. `OWNER_EMAILS` setzen und das Inhaberkonto registrieren.
-4. `.local/` auf einen dauerhaften, gesicherten Datenträger legen (kein Serverless-Dateisystem) und regelmäßig sichern.
+4. Auf einem eigenen Server betreiben, nicht auf Vercel (dort ist das Dateisystem schreibgeschützt). Schritt-für-Schritt: **`deploy/ANLEITUNG.md`**.
 5. Stripe zuerst im Testmodus einrichten. Preise: Basis 79 €/Monat, Betrieb 229 €/Monat.

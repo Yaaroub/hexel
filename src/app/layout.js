@@ -1,8 +1,11 @@
 import './globals.css';
 import './app.css';
+import './motion.css';
+import './blueprint.css';
 import SiteNavigation from './components/SiteNavigation';
 import SiteFooter from './components/SiteFooter';
 import Motion from './components/Motion';
+import ServiceWorker from './components/ServiceWorker';
 import {siteUrl,organization,pageMetadata} from '../lib/seo';
 
 export const metadata={
@@ -13,7 +16,7 @@ export const metadata={
 };
 export const viewport={width:'device-width',initialScale:1,themeColor:'#20242A'};
 
-const themeScript=`document.documentElement.classList.add('js');try{var t=localStorage.getItem('funknaht-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}`;
+const themeScript=`document.documentElement.classList.add('js');try{var s=localStorage.getItem('funknaht-text');if(s==='115'||s==='130'){document.documentElement.dataset.text=s;document.documentElement.style.fontSize=s+'%'}}catch(e){}try{var t=localStorage.getItem('funknaht-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}`;
 
 export default function RootLayout({children}){
  return <html lang="de" suppressHydrationWarning>
@@ -25,6 +28,7 @@ export default function RootLayout({children}){
    <main id="inhalt">{children}</main>
    <SiteFooter/>
    <Motion/>
+   <ServiceWorker/>
   </body>
  </html>;
 }

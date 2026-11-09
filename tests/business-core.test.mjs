@@ -22,7 +22,7 @@ test('accounts, session isolation, plan gates and appointment conflicts work tog
  const req=(token)=>new Request('http://localhost:3000/api/business',{headers:{host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000',cookie:auth.sessionCookie(token)}});
  assert.equal(auth.getAccount(req(token)).organization.id,first.organizationId);
  assert.equal(auth.getAccount(req(token)).organization.plan,'free','public privilege fields are ignored');
- assert.equal(auth.getAccount(req(token)).organization.role,'owner');
+ assert.equal(auth.getAccount(req(token)).organization.role,'inhaber');
  assert.notEqual(db.prepare('SELECT id FROM sessions WHERE user_id=?').get(first.userId).id,token,'opaque sessions are stored hashed');
  const stored=db.prepare('SELECT password_hash FROM users WHERE id=?').get(first.userId).password_hash;
  assert.ok(!stored.includes(password));assert.equal(await auth.verifyPassword(password,stored),true);assert.equal(await auth.verifyPassword('incorrect',stored),false);

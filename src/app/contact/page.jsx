@@ -1,7 +1,12 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import {ArrowRight,MapPin,Code2,CalendarCheck,Check,AlertCircle,ShieldCheck} from 'lucide-react';
+import {ArrowRight,Check,AlertCircle,ShieldCheck} from 'lucide-react';
+import CallbackForm from '../components/CallbackForm';
+import Split from '../components/Split';
+import Threads from '../components/Threads';
+import ProcessSteps from '../components/ProcessSteps';
+import {steps} from '../../lib/process';
 
 const topics=['Website','Webanwendung','Betriebsportal','KI & Automatisierung','Netzwerk & WLAN','Digitalhilfe für Senioren','Noch offen'];
 const placeholders={
@@ -23,16 +28,15 @@ export default function Contact(){
  }
  const network=topic==='Netzwerk & WLAN'||topic==='Digitalhilfe für Senioren';
  return <>
-  <section className="page-head">
-   <div className="wrap"><p className="intro">Kontakt</p><h1 className="display" style={{maxWidth:'12em'}}>Erzählen Sie uns, woran Sie arbeiten.</h1><p className="lead">Ein paar Sätze reichen für den Anfang. Wir melden uns per E-Mail mit Rückfragen oder einem Vorschlag für ein kurzes Gespräch.</p></div>
+  <section className="page-head glow"><Threads className="threads--soft"/>
+   <div className="wrap"><p className="intro">Kontakt</p><Split as="h1" className="display" style={{maxWidth:'12em'}}>Erzählen Sie uns, woran Sie arbeiten.</Split><p className="lead">Ein paar Sätze reichen für den Anfang. Wir melden uns per E-Mail mit Rückfragen oder einem Vorschlag für ein kurzes Gespräch.</p></div>
   </section>
   <section className="band">
    <div className="wrap contact">
-    <aside>
-     <div><MapPin size={22} color="var(--brass)"/><h2 style={{marginTop:10}}>Netzwerkhilfe vor Ort</h2><p>Im Kreis Plön und in Ostholstein. Nennen Sie Ihren Ort und die betroffenen Geräte.</p></div>
-     <div><Code2 size={22} color="var(--brass)"/><h2 style={{marginTop:10}}>Websites und Software</h2><p>Für Betriebe in der Region und deutschlandweit. Auch für bestehende Projekte, die weiterentwickelt werden sollen.</p></div>
-     <div><CalendarCheck size={22} color="var(--brass)"/><h2 style={{marginTop:10}}>Schon ein technisches Problem?</h2><p>Im <Link className="link" href="/portal">Hilfe-Portal</Link> grenzen Sie es Schritt für Schritt ein und übergeben alles mit einem Klick.</p></div>
-    </aside>
+    <div className="contact__aside">
+     <CallbackForm compact collapsible level={2} title="Lieber telefonieren?" intro="Hinterlassen Sie Ihre Nummer, wir rufen zurück."/>
+     <p className="contact__hint">Schon ein technisches Problem? Im <Link className="link" href="/portal">Hilfe-Portal</Link> grenzen Sie es Schritt für Schritt ein.</p>
+    </div>
     {status?.ok?<div className="panel" role="status" style={{display:'grid',gap:16,justifyItems:'start'}}><span className="success-mark"><Check size={28}/></span><h2 className="h3">Danke, Ihre Anfrage ist angekommen.</h2><p className="prose">Wir antworten an die angegebene E-Mail-Adresse. Falls Sie in den nächsten Tagen nichts hören, sehen Sie bitte im Spam-Ordner nach.</p><button className="link" onClick={()=>setStatus(null)}>Weitere Anfrage schreiben<ArrowRight size={16}/></button></div>:
     <form className="panel form" onSubmit={submit} aria-busy={busy}>
      <fieldset disabled={busy}>
@@ -53,6 +57,12 @@ export default function Contact(){
       <div className="actions"><button className="btn" type="submit">{busy?'Wird gesendet …':'Anfrage senden'}<ArrowRight size={18}/></button></div>
      </fieldset>
     </form>}
+   </div>
+  </section>
+  <section className="band band--stone">
+   <div className="wrap process">
+    <div><Split as="h2" className="h2">So wird aus einer Idee ein Werkzeug.</Split><p className="prose" style={{marginTop:20}}>Sie müssen keine technischen Begriffe kennen. Wichtig ist, was Ihnen im Alltag Zeit kostet. Den Rest übersetzen wir.</p></div>
+    <ProcessSteps steps={steps}/>
    </div>
   </section>
  </>;

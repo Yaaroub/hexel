@@ -4,11 +4,12 @@ import Link from 'next/link';
 import {ArrowRight,Eye,EyeOff,LogOut,Download,Trash2,CalendarCheck,LifeBuoy,ShieldCheck,AlertCircle,X,KeyRound} from 'lucide-react';
 
 const allowedNext=['/portal','/portal/werkstatt','/betrieb','/inhaber'];
+const okNext=v=>allowedNext.includes(v)||/^\/einladung\/[A-Za-z0-9_-]{20,80}$/.test(v||'');
 
 export default function AccountClient(){
  const [tab,setTab]=useState('login'),[type,setType]=useState('business'),[show,setShow]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[session,setSession]=useState(null),[checking,setChecking]=useState(true),[next,setNext]=useState('');
  const del=useRef(null),[delError,setDelError]=useState('');
- useEffect(()=>{const q=new URLSearchParams(location.search);if(allowedNext.includes(q.get('next')))setNext(q.get('next'));if(q.get('typ')==='betrieb'){setTab('register');setType('business')}
+ useEffect(()=>{const q=new URLSearchParams(location.search);if(okNext(q.get('next')))setNext(q.get('next'));if(q.get('typ')==='betrieb'){setTab('register');setType('business')}
   fetch('/api/account/me',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>setSession(d?.account||null)).catch(()=>{}).finally(()=>setChecking(false))},[]);
  const home=a=>next||(a?.isOwner?'/inhaber':a?.organization?.accountType==='business'?'/betrieb':'/portal/werkstatt');
  async function submit(e){

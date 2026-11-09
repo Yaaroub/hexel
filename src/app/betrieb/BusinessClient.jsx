@@ -1,9 +1,12 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
-import {LayoutDashboard,Users,CalendarDays,ClipboardList,Wrench,Link2,CreditCard,LifeBuoy,Plus,Check,X,RefreshCw,LogOut,Copy,ExternalLink,AlertCircle,ArrowRight,Lock,Settings} from 'lucide-react';
+import {LayoutDashboard,Users,CalendarDays,ClipboardList,Wrench,Link2,CreditCard,LifeBuoy,Plus,Check,X,RefreshCw,LogOut,Copy,ExternalLink,AlertCircle,ArrowRight,Lock,Settings,UsersRound,Bell,CalendarSync,Trash2} from 'lucide-react';
 
-const sections=[['overview','Überblick',LayoutDashboard],['appointments','Termine',CalendarDays],['clients','Kunden',Users],['orders','Aufträge',ClipboardList],['services','Leistungen',Wrench],['settings','Buchungsseite',Link2],['plans','Tarif & Abrechnung',CreditCard]];
+const sections=[['overview','Überblick',LayoutDashboard],['appointments','Termine',CalendarDays],['clients','Kunden',Users],['orders','Aufträge',ClipboardList],['services','Leistungen',Wrench],['settings','Buchungsseite',Link2],['team','Team',UsersRound],['plans','Tarif & Abrechnung',CreditCard]];
+// Welche Bereiche sieht welche Rolle?
+const allowed={inhaber:null,buero:['overview','appointments','clients','orders','services','settings','team'],monteur:['overview','appointments']};
+const roleLabel={inhaber:'Inhaber',buero:'Büro',monteur:'Monteur'};
 const status={pending:['wait','Angefragt'],confirmed:['ok','Bestätigt'],cancelled:['muted','Abgesagt'],completed:['info','Erledigt'],open:['wait','Offen'],in_progress:['info','In Arbeit']};
 const money=v=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format((v||0)/100);
 const when=v=>new Intl.DateTimeFormat('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'}).format(new Date(v));
@@ -15,11 +18,15 @@ const Badge=({value})=>{const [tone,label]=status[value]||['muted',value];return
 export default function BusinessClient(){
  const [data,setData]=useState(null),[tab,setTab]=useState('overview'),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editor,setEditor]=useState(null),[unauth,setUnauth]=useState(false),[billing,setBilling]=useState(null),[copied,setCopied]=useState(false);
  const sheet=useRef(null);
+ const [team,setTeam]=useState(null),[teamLink,setTeamLink]=useState(''),[cal,setCal]=useState(null);
+ async function loadTeam(){try{const r=await fetch('/api/business/team',{cache:'no-store'});const d=await r.json();if(r.ok)setTeam(d)}catch{}}
+ async function teamCall(method,body,ok){setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/business/team',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw Error(d.error||'Das hat nicht geklappt.');setTeam(t=>({...t,...d}));if(d.link)setTeamLink(d.link);if(ok)setNotice(ok)}catch(e){setError(e.message)}finally{setBusy(false)}}
+ async function loadCal(renew){try{const r=await fetch('/api/business/calendar',{method:renew?'POST':'GET',cache:'no-store'});const d=await r.json();if(r.ok){setCal(d);if(renew)setNotice('Neuer Kalender-Link erstellt. Der alte funktioniert nicht mehr.')}}catch{}}
  async function load(){const r=await fetch('/api/business',{cache:'no-store'});const d=await r.json();if(!r.ok){if(r.status===401)setUnauth(true);throw Error(d.error||'Der Arbeitsbereich konnte nicht geladen werden.')}setData(d);return d}
  useEffect(()=>{const q=new URLSearchParams(location.search);if(['abo','plans'].includes(q.get('tab')))setTab('plans');if(q.get('checkout')==='success')setNotice('Danke! Ihr Tarif wird freigeschaltet, sobald die Zahlung bestätigt ist. Das dauert meist nur wenige Sekunden.');if(q.get('checkout')==='cancelled')setNotice('Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet.');
   load().catch(e=>setError(e.message)).finally(()=>setLoading(false));fetch('/api/billing/status',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(setBilling).catch(()=>{})},[]);
  useEffect(()=>{if(editor)sheet.current?.showModal();else sheet.current?.close()},[editor]);
- function change(next){setTab(next);setError('');setNotice('');setEditor(null)}
+ function change(next){setTab(next);setError('');setNotice('');setEditor(null);if(next==='team')loadTeam();if(next==='settings'&&!cal)loadCal()}
  async function mutate(payload,done='Gespeichert.'){if(busy)return false;setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/business',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw Error(d.error||'Die Änderung wurde nicht gespeichert.');await load();setNotice(done);setEditor(null);return true}catch(e){setError(e.message);return false}finally{setBusy(false)}}
  async function submit(e,type){e.preventDefault();const f=Object.fromEntries(new FormData(e.currentTarget));if(type==='service'){f.durationMinutes=Number(f.durationMinutes);f.priceCents=Math.round(Number(f.priceEuro||0)*100);f.active=f.active==='on';delete f.priceEuro}if(type==='order'){f.amountCents=Math.round(Number(f.amountEuro||0)*100);delete f.amountEuro}if(type==='appointment')f.startsAt=new Date(f.startsAt).toISOString();await mutate({action:type+'.'+(editor?.id?'update':'create'),...(editor?.id?{id:editor.id}:{}),...f})}
  async function billingAction(action,planId){setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/billing/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(planId?{planId}:{})});const d=await r.json();if(!r.ok)throw Error(d.error||'Die Tarifverwaltung ist gerade nicht erreichbar.');if(d.url)location.assign(d.url);else{if(d.current)setBilling(d);await load();setNotice(action==='preview'?'Testtarif aktiv. Es wurde keine Zahlung ausgelöst.':'Tarif aktualisiert.')}}catch(e){setError(e.message)}finally{setBusy(false)}}
@@ -28,6 +35,7 @@ export default function BusinessClient(){
  if(loading)return <div className="wrap app"><p className="muted" role="status">Ihr Arbeitsbereich wird geladen …</p></div>;
  if(!data)return <div className="wrap app"><div className="empty" style={{maxWidth:580}}><Lock size={28}/><h3>{unauth?'Bitte melden Sie sich an.':'Der Arbeitsbereich ist gerade nicht erreichbar.'}</h3><p>{unauth?'Der Arbeitsbereich gehört zu Ihrem Betriebskonto.':error}</p><Link className="btn" href="/konto?next=/betrieb">Anmelden oder Konto anlegen</Link></div></div>;
 
+ const role=data.role||data.account.user.role||'inhaber',visible=sections.filter(([id])=>!allowed[role]||allowed[role].includes(id));
  const org=data.account.organization,user=data.account.user,planId=org.effectivePlan||'free',hasBusiness=['basic','betrieb','individuell'].includes(planId),hasOrders=['betrieb','individuell'].includes(planId);
  const plan=data.plans?.find(p=>p.id===planId),clients=data.clients||[],services=data.services||[],appointments=data.appointments||[],orders=data.orders||[],settings=data.settings||{},limits=data.limits||{},usage=data.usage||{};
  const bookingUrl=(typeof window!=='undefined'?location.origin:'')+'/buchen/'+org.slug;
@@ -39,11 +47,11 @@ export default function BusinessClient(){
 
  return <div className="wrap app">
   <div className="app__head">
-   <div><h1 className="app__title">{org.name}</h1><p className="app__sub">{user.name} · Tarif {plan?.name||planId}{org.sandboxEnabled?' (lokaler Test)':''}</p></div>
+   <div><h1 className="app__title">{org.name}</h1><p className="app__sub">{user.name} ({roleLabel[role]}) · Tarif {plan?.name||planId}{org.sandboxEnabled?' (lokaler Test)':''}</p></div>
    <div className="actions"><Link className="mini-btn" href="/portal"><LifeBuoy size={15}/>Technische Hilfe</Link><button className="mini-btn" onClick={()=>{setBusy(true);load().then(()=>setNotice('Aktualisiert.')).catch(e=>setError(e.message)).finally(()=>setBusy(false))}} disabled={busy}><RefreshCw size={15}/>Aktualisieren</button><button className="mini-btn" onClick={logout}><LogOut size={15}/>Abmelden</button></div>
   </div>
   <div className="app__layout">
-   <nav className="app-nav" aria-label="Bereiche">{sections.map(([id,label,Icon])=><button key={id} aria-current={tab===id?'page':undefined} onClick={()=>change(id)}><Icon size={17}/>{label}{id==='orders'&&!hasOrders?<span className="lock">Betrieb</span>:counts[id]?<span className="count">{counts[id]}</span>:null}</button>)}<hr/><Link href="/portal/werkstatt"><LifeBuoy size={17}/>Meine Anfragen</Link><Link href="/konto"><Settings size={17}/>Konto und Daten</Link></nav>
+   <nav className="app-nav" aria-label="Bereiche">{visible.map(([id,label,Icon])=><button key={id} aria-current={tab===id?'page':undefined} onClick={()=>change(id)}><Icon size={17}/>{label}{id==='orders'&&!hasOrders?<span className="lock">Betrieb</span>:counts[id]?<span className="count">{counts[id]}</span>:null}</button>)}<hr/><Link href="/portal/werkstatt"><LifeBuoy size={17}/>Meine Anfragen</Link><Link href="/konto"><Settings size={17}/>Konto und Daten</Link></nav>
    <div className="app-main">
     {error&&<p className="notice notice--error" role="alert"><AlertCircle size={18}/>{error}</p>}
     {notice&&<p className="notice notice--ok" role="status"><Check size={18}/>{notice}</p>}
@@ -62,7 +70,7 @@ export default function BusinessClient(){
      </section>
     </>}
 
-    {tab==='appointments'&&<section className="panel"><div className="panel__head"><div><h2>Termine</h2><p>Alle Zeiten in deutscher Zeit (Europe/Berlin).</p></div>{hasBusiness&&<button className="btn btn--small" onClick={()=>setEditor({type:'appointment'})}><Plus size={16}/>Termin eintragen</button>}</div>
+    {tab==='appointments'&&<section className="panel"><div className="panel__head"><div><h2>Termine</h2><p>Alle Zeiten in deutscher Zeit (Europe/Berlin).</p></div>{hasBusiness&&role!=='monteur'&&<button className="btn btn--small" onClick={()=>setEditor({type:'appointment'})}><Plus size={16}/>Termin eintragen</button>}</div>
      {!hasBusiness?gate():appointments.length===0?<div className="empty"><CalendarDays size={26}/><h3>Noch keine Termine.</h3><p>Tragen Sie einen Termin selbst ein oder geben Sie Ihre Buchungsseite frei.</p></div>:<div className="rows">{appointments.slice().sort((a,b)=>new Date(b.startsAt)-new Date(a.startsAt)).map(a=><div className="row" key={a.id}><div><div className="row__title">{when(a.startsAt)} Uhr · {a.customerName}</div><div className="row__meta">{serviceName(a.serviceId)}{a.customerEmail?' · '+a.customerEmail:''}{a.customerPhone?' · '+a.customerPhone:''}</div>{a.notes&&<div className="row__note">{a.notes}</div>}</div><div className="row__actions"><label className="sr-only" htmlFor={'st-'+a.id}>Status</label><select id={'st-'+a.id} className="input" style={{minHeight:36,width:'auto',padding:'4px 10px'}} value={a.status} disabled={busy} onChange={e=>mutate({action:'appointment.update',id:a.id,status:e.target.value})}>{['pending','confirmed','completed','cancelled'].map(s=><option key={s} value={s}>{status[s][1]}</option>)}</select></div></div>)}</div>}
     </section>}
 
@@ -81,16 +89,31 @@ export default function BusinessClient(){
     {tab==='settings'&&<section className="panel"><div className="panel__head"><div><h2>Buchungsseite</h2><p>Ihr Link für Website, E-Mail-Signatur oder Google-Profil.</p></div></div>
      {!hasBusiness?gate():<div className="form">
       <div className="share"><Link2 size={18}/><code>{bookingUrl}</code><div className="actions" style={{marginLeft:'auto'}}><button className="mini-btn" onClick={async()=>{try{await navigator.clipboard.writeText(bookingUrl);setCopied(true);setTimeout(()=>setCopied(false),2000)}catch{setError('Kopieren nicht möglich. Bitte markieren Sie den Link.')}}}><Copy size={14}/>{copied?'Kopiert':'Kopieren'}</button><a className="mini-btn" href={'/buchen/'+org.slug} target="_blank" rel="noreferrer"><ExternalLink size={14}/>Öffnen</a></div></div>
-      <form className="form" onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);mutate({action:'settings.update',name:f.get('name'),slug:f.get('slug'),workingDays:f.getAll('workingDays').map(Number),openTime:f.get('openTime'),closeTime:f.get('closeTime'),slotMinutes:Number(f.get('slotMinutes')),bookingEnabled:f.get('bookingEnabled')==='on'},'Buchungsseite gespeichert.')}}><fieldset disabled={busy}>
+      <form className="form" onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);mutate({action:'settings.update',name:f.get('name'),slug:f.get('slug'),workingDays:f.getAll('workingDays').map(Number),openTime:f.get('openTime'),closeTime:f.get('closeTime'),slotMinutes:Number(f.get('slotMinutes')),bookingEnabled:f.get('bookingEnabled')==='on',reminders:f.get('reminders')==='on'},'Buchungsseite gespeichert.')}}><fieldset disabled={busy}>
        <div className="form-grid"><label className="field">Name des Betriebs<input name="name" required maxLength={150} defaultValue={org.name}/></label><label className="field">Adresse der Seite<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" minLength={3} maxLength={64} defaultValue={org.slug} aria-describedby="slug-hint"/></label></div>
        <p className="hint" id="slug-hint">Kleinbuchstaben, Ziffern und Bindestriche. Ändern Sie die Adresse, ändert sich auch Ihr Link.</p>
        <fieldset className="field" style={{border:0,padding:0,margin:0}}><legend style={{marginBottom:8}}>Buchbare Tage</legend><div className="days">{weekdays.map((d,i)=><label className="choice" key={d}><input type="checkbox" name="workingDays" value={(i+1)%7} defaultChecked={settings.workingDays?.includes((i+1)%7)}/><span>{d}</span></label>)}</div></fieldset>
        <div className="form-grid"><label className="field">Erster Termin ab<input name="openTime" type="time" required defaultValue={settings.openTime||'09:00'}/></label><label className="field">Letzter Termin endet um<input name="closeTime" type="time" required defaultValue={settings.closeTime||'17:00'}/></label></div>
        <label className="field">Startzeiten im Abstand von<select name="slotMinutes" defaultValue={settings.slotMinutes||30}>{[15,30,60].map(m=><option key={m} value={m}>{m} Minuten</option>)}</select></label>
        <label className="check"><input type="checkbox" name="bookingEnabled" defaultChecked={settings.bookingEnabled!==false}/><span>Online-Buchung ist geöffnet</span></label>
+       <label className="check"><input type="checkbox" name="reminders" defaultChecked={settings.reminders!==false}/><span><Bell size={14} style={{display:'inline',verticalAlign:-2}}/> Kunden am Vortag per E-Mail erinnern, mit Link zum Absagen. Das senkt ausgefallene Termine.</span></label>
        <div className="actions"><button className="btn">Speichern<Check size={17}/></button></div>
       </fieldset></form>
+      <div className="panel panel--quiet" style={{display:'grid',gap:12}}>
+       <h3 className="h3" style={{fontSize:'1.05rem'}}><CalendarSync size={17} style={{display:'inline',verticalAlign:-3}}/> Termine im Handy-Kalender</h3>
+       <p className="hint">Mit diesem Link erscheinen alle Termine automatisch im Kalender auf Handy oder PC (iPhone, Android, Outlook). Halten Sie den Link geheim, er enthält Kundennamen.</p>
+       {cal?<><div className="share"><code>{cal.url}</code><button className="mini-btn" onClick={async()=>{try{await navigator.clipboard.writeText(cal.url);setNotice('Kalender-Link kopiert.')}catch{}}}><Copy size={14}/>Kopieren</button><a className="mini-btn" href={cal.webcal}><CalendarSync size={14}/>Direkt abonnieren</a></div><button className="link" style={{justifySelf:'start',fontSize:'.9rem'}} onClick={()=>{if(confirm('Neuen Link erzeugen? Der alte hört sofort auf zu funktionieren.'))loadCal(true)}}>Link erneuern</button></>:<button className="mini-btn" style={{justifySelf:'start'}} onClick={()=>loadCal()}>Kalender-Link anzeigen</button>}
+      </div>
      </div>}
+    </section>}
+
+    {tab==='team'&&<section className="panel"><div className="panel__head"><div><h2>Team</h2><p>Zugänge für Mitarbeiter. Monteure sehen nur Termine, das Büro alles außer Tarif und Team.</p></div></div>
+     {!team?<p className="muted">Wird geladen …</p>:<>
+      <div className="rows">{team.members.map(m=><div className="row" key={m.id}><div><div className="row__title">{m.name}{m.id===team.me?' (Sie)':''}</div><div className="row__meta">{m.email}</div></div><div className="row__actions">{role==='inhaber'&&m.id!==team.me?<><select className="input" style={{width:'auto',minHeight:36,padding:'4px 10px'}} value={m.role} disabled={busy} onChange={e=>teamCall('PATCH',{userId:m.id,role:e.target.value},'Rolle geändert.')} aria-label={'Rolle von '+m.name}>{Object.entries(team.roles).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><button className="mini-btn mini-btn--danger" disabled={busy} onClick={()=>{if(confirm(m.name+' wirklich entfernen?'))teamCall('DELETE',{userId:m.id},'Zugang entfernt.')}}><Trash2 size={14}/></button></>:<span className="badge badge--muted">{team.roles[m.role]}</span>}</div></div>)}
+       {team.invites.map(i=><div className="row" key={i.id}><div><div className="row__title">{i.email}</div><div className="row__meta">Eingeladen als {team.roles[i.role]} · noch nicht angenommen</div></div>{role==='inhaber'&&<button className="mini-btn" disabled={busy} onClick={()=>teamCall('DELETE',{inviteId:i.id},'Einladung zurückgezogen.')}>Zurückziehen</button>}</div>)}</div>
+      {role==='inhaber'&&<form className="form" style={{marginTop:20}} onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);teamCall('POST',{email:f.get('email'),role:f.get('role')},'Einladung erstellt.');e.currentTarget.reset()}}><fieldset disabled={busy}><div className="form-grid"><label className="field">E-Mail des Mitarbeiters<input name="email" type="email" required/></label><label className="field">Rolle<select name="role" defaultValue="monteur"><option value="monteur">Monteur: nur Termine</option><option value="buero">Büro: alles außer Tarif und Team</option><option value="inhaber">Inhaber: alles</option></select></label></div><div className="actions"><button className="btn btn--small"><Plus size={16}/>Einladen</button></div></fieldset></form>}
+      {teamLink&&<div className="share" style={{marginTop:14}}><span style={{flexBasis:'100%'}}>Einladungslink (7 Tage gültig). Falls keine E-Mail ankommt, schicken Sie ihn selbst:</span><code>{teamLink}</code></div>}
+     </>}
     </section>}
 
     {tab==='plans'&&<section className="panel"><div className="panel__head"><div><h2>Tarif & Abrechnung</h2><p>Aktuell: {plan?.name||planId}{org.sandboxEnabled?' (lokaler Test, keine Zahlung)':''}</p></div></div>

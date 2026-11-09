@@ -68,7 +68,7 @@ export default function Bench(){
  const caretLine=(()=>{let b=typed;for(let i=0;i<lines.length;i++){const len=source.split('\n')[i].length;if(b<=len)return i;b-=len+1}return lines.length-1})();
  const free=slots.filter(s=>!s.busy).length;
 
- return <figure className="bench" ref={root} aria-label="Animation: Programmcode für freie Termine wird geschrieben, daneben entsteht die passende Buchungsansicht.">
+ return <figure className="bench" data-sheet="BLATT 01 · TERMINE.JS" ref={root} aria-label="Animation: Programmcode für freie Termine wird geschrieben, daneben entsteht die passende Buchungsansicht.">
   <div className="bench__bar">
    <span className="bench__dots" aria-hidden="true"><i/><i/><i/></span>
    <span className="bench__tabs" aria-hidden="true"><span aria-current="true">termine.js</span><span>Vorschau</span></span>

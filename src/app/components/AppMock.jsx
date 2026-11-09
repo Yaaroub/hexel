@@ -15,7 +15,7 @@ export default function AppMock(){
   if(root.current)observer.observe(root.current);return()=>observer.disconnect();
  },[]);
  const list=arrived?[...base.slice(0,2),incoming,base[2]]:base;
- return <figure className="app-mock reveal" ref={root} aria-label="Beispielansicht des Arbeitsbereichs für Betriebe mit Terminen des Tages">
+ return <figure className="app-mock reveal" data-sheet="BLATT 02 · BETRIEBSPORTAL" ref={root} aria-label="Beispielansicht des Arbeitsbereichs für Betriebe mit Terminen des Tages">
   <div className="app-mock__top"><strong>Heizung &amp; Sanitär Beispiel</strong><span>Beispielansicht</span></div>
   <div className="app-mock__grid">
    <div className="app-mock__side" aria-hidden="true"><span>Überblick</span><span aria-current="true">Termine</span><span>Kunden</span><span>Aufträge</span><span>Leistungen</span><span>Buchungsseite</span></div>

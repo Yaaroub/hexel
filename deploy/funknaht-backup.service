@@ -1,0 +1,8 @@
+# /etc/systemd/system/funknaht-backup.service
+[Unit]
+Description=FUNKNAHT nächtliche Sicherung
+
+[Service]
+Type=oneshot
+User=funknaht
+ExecStart=/opt/funknaht/deploy/backup.sh

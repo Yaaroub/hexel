@@ -84,6 +84,13 @@ export function overview(){
   tickets:{open:tickets.offen||0,inProgress:tickets['in-pruefung']||0,resolved:tickets.geloest||0,awaitingOwner:db.prepare("SELECT COUNT(*) AS n FROM support_tickets WHERE status<>'geloest' AND awaiting='owner'").get().n,urgent:db.prepare("SELECT COUNT(*) AS n FROM support_tickets WHERE status<>'geloest' AND priority='dringend'").get().n},
   minutesThisMonth:db.prepare('SELECT COALESCE(SUM(minutes),0) AS m FROM ticket_time WHERE substr(work_date,1,7)=?').get(month).m,
   ai:{period:month,requests:db.prepare('SELECT COALESCE(SUM(count),0) AS count FROM ai_usage WHERE period=?').get(month).count},
+  callbacksOpen:db.prepare("SELECT COUNT(*) AS n FROM callbacks WHERE status='neu'").get().n,
+  monitors:Object.fromEntries(db.prepare('SELECT state,COUNT(*) AS n FROM monitors GROUP BY state').all().map(r=>[r.state,r.n])),
+  warrantySoon:db.prepare('SELECT COUNT(*) AS n FROM devices WHERE warranty_until BETWEEN ? AND ?').get(new Date().toISOString().slice(0,10),new Date(Date.now()+60*86400000).toISOString().slice(0,10)).n,
+  ratings:db.prepare('SELECT COUNT(*) AS total,COALESCE(SUM(rating),0) AS helpful FROM support_tickets WHERE rating IS NOT NULL').get(),
+  openOffers:db.prepare("SELECT COUNT(*) AS n FROM documents WHERE type='angebot' AND status='versendet'").get().n,
+  unpaidInvoices:db.prepare("SELECT COUNT(*) AS n FROM documents WHERE type='rechnung' AND status='versendet'").get().n,
+  overdueInvoices:db.prepare("SELECT COUNT(*) AS n FROM documents WHERE type='rechnung' AND status='versendet' AND due_on<?").get(new Date().toISOString().slice(0,10)).n,
   bookingsLast30Days:db.prepare('SELECT COUNT(*) AS count FROM appointments WHERE created_at>=?').get(since).count,
  };
 }
@@ -108,10 +115,11 @@ export function listAccounts(){
 
 function ticketView(row,{reveal=false}={}){
  let payload={};try{payload=JSON.parse(row.payload)}catch{}
- const base={id:row.id,kind:payload.kind,category:payload.category,status:row.status,priority:row.priority||'normal',awaiting:row.awaiting||'owner',createdAt:row.created_at,updatedAt:row.updated_at,lastActivityAt:row.last_activity_at||row.updated_at,anonymized:!!row.anonymized_at,summary:String(payload.description||'').slice(0,140),accountType:row.account_type};
+ const base={source:row.source||'portal',id:row.id,kind:payload.kind,category:payload.category,status:row.status,priority:row.priority||'normal',awaiting:row.awaiting||'owner',createdAt:row.created_at,updatedAt:row.updated_at,lastActivityAt:row.last_activity_at||row.updated_at,anonymized:!!row.anonymized_at,summary:String(payload.description||'').slice(0,140),accountType:row.account_type};
  if(!reveal)return {...base,contact:payload.email?maskEmail(payload.email):''};
  let diagnostics=null;try{diagnostics=row.diagnostics?JSON.parse(row.diagnostics):null}catch{}
- return {...base,description:payload.description,device:payload.device,attempts:payload.attempts||[],name:payload.name,email:payload.email,location:payload.location,diagnostics,organizationName:row.account_type==='business'?row.organization_name:null,...thread(row.id,{includeInternal:true}),time:timeFor(row.id)};
+ const device=row.device_id?getDb().prepare('SELECT label FROM devices WHERE id=?').get(row.device_id):null;
+ return {...base,source:row.source||'portal',phone:payload.phone||'',deviceLabel:device?.label||null,rating:row.rating,ratingComment:row.rating_comment,organizationId:row.organization_id,description:payload.description,device:payload.device,attempts:payload.attempts||[],name:payload.name,email:payload.email,location:payload.location,diagnostics,organizationName:row.account_type==='business'?row.organization_name:null,...thread(row.id,{includeInternal:true}),time:timeFor(row.id)};
 }
 
 export function listTickets(){

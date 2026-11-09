@@ -28,11 +28,12 @@ export function cleanDiagnostics(input){
  return Object.keys(out).length?out:null;
 }
 
-export function createTicket(account,value,{priority='normal',diagnostics=null}={}){
+export function createTicket(account,value,{priority='normal',diagnostics=null,orgId=account.organization.id,deviceId=null}={}){
  if(!PRIORITIES.includes(priority))throw appError('Ungültige Dringlichkeit.');
  const id='FN-'+randomUUID().slice(0,8).toUpperCase(),ts=now(),diag=cleanDiagnostics(diagnostics);
  transaction(db=>{
-  db.prepare("INSERT INTO support_tickets(id,organization_id,user_id,payload,status,priority,awaiting,diagnostics,created_at,updated_at,last_activity_at) VALUES(?,?,?,?,'offen',?,'owner',?,?,?,?)").run(id,account.organization.id,account.user.id,JSON.stringify(value),priority,diag?JSON.stringify(diag):null,ts,ts,ts);
+  const device=deviceId&&db.prepare('SELECT id FROM devices WHERE id=? AND organization_id=?').get(String(deviceId),orgId);
+  db.prepare("INSERT INTO support_tickets(id,organization_id,user_id,payload,status,priority,awaiting,diagnostics,device_id,created_at,updated_at,last_activity_at) VALUES(?,?,?,?,'offen',?,'owner',?,?,?,?,?)").run(id,orgId,account.user.id,JSON.stringify(value),priority,diag?JSON.stringify(diag):null,device?.id||null,ts,ts,ts);
  });
  return {id,status:'offen',priority,createdAt:ts};
 }
@@ -60,22 +61,31 @@ export function customerTickets(orgId){
  return db.prepare('SELECT * FROM support_tickets WHERE organization_id=? ORDER BY COALESCE(last_activity_at,updated_at) DESC').all(orgId).map(row=>({...ticketSummary(row),...parse(row.payload,{}),id:row.id,status:row.status,messageCount:db.prepare('SELECT COUNT(*) AS n FROM ticket_messages WHERE ticket_id=? AND internal=0').get(row.id).n}));
 }
 function customerRow(orgId,id){assertId(id);const row=getDb().prepare('SELECT * FROM support_tickets WHERE id=? AND organization_id=?').get(id,orgId);if(!row)throw appError('Anfrage nicht gefunden.',404,'NOT_FOUND');return row}
-export function customerThread(orgId,id){const row=customerRow(orgId,id);return {ticket:{...ticketSummary(row),...parse(row.payload,{}),id:row.id,status:row.status,diagnostics:parse(row.diagnostics,null)},...thread(id)}}
-export function addCustomerMessage(account,id,body){
- const row=customerRow(account.organization.id,id),text=cleanBody(body),ts=now(),msgId=randomUUID();
+export function customerThread(orgId,id){const row=customerRow(orgId,id);const device=row.device_id?getDb().prepare('SELECT label FROM devices WHERE id=?').get(row.device_id):null;return {ticket:{...ticketSummary(row),...parse(row.payload,{}),id:row.id,status:row.status,diagnostics:parse(row.diagnostics,null),deviceLabel:device?.label||null,rating:row.rating,ratingComment:row.rating_comment},...thread(id)}}
+// Kurze Rückmeldung nach Abschluss: hat es geholfen? Veröffentlichung nur mit ausdrücklicher Zustimmung.
+export function rateTicket(orgId,id,{helpful,comment='',publish=false}){
+ const row=customerRow(orgId,id);
+ if(row.status!=='geloest')throw appError('Bewerten können Sie, sobald die Anfrage erledigt ist.',409);
+ if(typeof helpful!=='boolean')throw appError('Bitte wählen Sie eine Antwort.');
+ if(typeof comment!=='string'||comment.length>600)throw appError('Der Kommentar darf höchstens 600 Zeichen haben.');
+ getDb().prepare('UPDATE support_tickets SET rating=?,rating_comment=?,rating_public=? WHERE id=?').run(helpful?1:0,comment.trim()||null,publish===true&&helpful?1:0,id);
+ return customerThread(orgId,id);
+}
+export function addCustomerMessage(account,id,body,orgId=account.organization.id){
+ const row=customerRow(orgId,id),text=cleanBody(body),ts=now(),msgId=randomUUID();
  if(row.anonymized_at)throw appError('Diese Anfrage ist abgeschlossen und archiviert.',409,'ANONYMIZED');
  transaction(db=>{
   db.prepare("INSERT INTO ticket_messages(id,ticket_id,author,author_user_id,body,internal,created_at) VALUES(?,?,'customer',?,?,0,?)").run(msgId,id,account.user.id,text,ts);
   // A new message on a closed request reopens it.
   db.prepare("UPDATE support_tickets SET awaiting='owner',status=CASE WHEN status='geloest' THEN 'offen' ELSE status END,updated_at=?,last_activity_at=? WHERE id=?").run(ts,ts,id);
  });
- return customerThread(account.organization.id,id);
+ return customerThread(orgId,id);
 }
-export function setCustomerStatus(account,id,status){
+export function setCustomerStatus(account,id,status,orgId=account.organization.id){
  if(!['offen','geloest'].includes(status))throw appError('Diese Änderung ist nicht möglich.');
- customerRow(account.organization.id,id);const ts=now();
+ customerRow(orgId,id);const ts=now();
  getDb().prepare('UPDATE support_tickets SET status=?,updated_at=?,last_activity_at=? WHERE id=?').run(status,ts,ts,id);
- return customerThread(account.organization.id,id);
+ return customerThread(orgId,id);
 }
 
 // ---------- Owner side ----------
@@ -140,8 +150,8 @@ export function addTime(ticketId,{minutes,note='',billable=true,date}){
  getDb().prepare('INSERT INTO ticket_time(id,ticket_id,minutes,note,billable,work_date,created_at) VALUES(?,?,?,?,?,?,?)').run(id,ticketId,minutes,note.trim(),billable?1:0,day,now());
  return id;
 }
-export function removeTime(id){if(typeof id!=='string'||!/^[0-9a-f-]{36}$/.test(id))throw appError('Eintrag nicht gefunden.',404);if(!getDb().prepare('DELETE FROM ticket_time WHERE id=?').run(id).changes)throw appError('Eintrag nicht gefunden.',404)}
-export function timeFor(ticketId){return getDb().prepare('SELECT id,minutes,note,billable,work_date AS date FROM ticket_time WHERE ticket_id=? ORDER BY work_date,created_at').all(ticketId).map(r=>({...r,billable:!!r.billable}))}
+export function removeTime(id){if(typeof id!=='string'||!/^[0-9a-f-]{36}$/.test(id))throw appError('Eintrag nicht gefunden.',404);if(getDb().prepare('SELECT document_id FROM ticket_time WHERE id=?').get(id)?.document_id)throw appError('Diese Zeit ist bereits in einem Beleg berechnet. Stornieren Sie zuerst den Beleg.',409);if(!getDb().prepare('DELETE FROM ticket_time WHERE id=?').run(id).changes)throw appError('Eintrag nicht gefunden.',404)}
+export function timeFor(ticketId){return getDb().prepare('SELECT tt.id,tt.minutes,tt.note,tt.billable,tt.work_date AS date,CASE WHEN d.status=\'entwurf\' THEN \'Entwurf\' ELSE d.number END AS billedIn FROM ticket_time tt LEFT JOIN documents d ON d.id=tt.document_id WHERE tt.ticket_id=? ORDER BY tt.work_date,tt.created_at').all(ticketId).map(r=>({...r,billable:!!r.billable}))}
 export function timeReport(month){
  if(typeof month!=='string'||!/^\d{4}-\d{2}$/.test(month))throw appError('Ungültiger Monat.');
  return getDb().prepare("SELECT tt.work_date AS date,tt.minutes,tt.note,tt.billable,t.id AS ticket,o.name AS organization,o.account_type FROM ticket_time tt JOIN support_tickets t ON t.id=tt.ticket_id JOIN organizations o ON o.id=t.organization_id WHERE substr(tt.work_date,1,7)=? ORDER BY tt.work_date").all(month).map(r=>({...r,billable:!!r.billable,organization:r.account_type==='business'?r.organization:'Privatkunde'}));

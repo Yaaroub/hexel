@@ -1,0 +1,248 @@
+/* ==========================================================================
+   FUNKNAHT – Bewegung
+   Leitidee: Die Naht wird genäht. Messingstiche laufen, ziehen Linien und
+   halten Abschnitte zusammen. Alles läuft nur, solange es zu sehen ist,
+   und steht bei „Bewegung reduzieren“ still.
+   ========================================================================== */
+:root{--stitch:repeating-linear-gradient(90deg,var(--brass) 0 9px,transparent 9px 16px);--out:cubic-bezier(.16,1,.3,1)}
+
+/* ---- Überschriften gleiten Wort für Wort aus einer Maske ---- */
+.words .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
+.words .w>span{display:inline-block}
+.js .words .w>span{transform:translateY(108%);transition:transform .9s var(--out);transition-delay:calc(var(--d,0ms) + var(--i)*55ms)}
+.js .words.is-visible .w>span{transform:none}
+
+/* ---- Die Naht unter der Kopfzeile zeigt, wie weit man gelesen hat ---- */
+.site-header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--stitch);background-size:16px 2px;transform-origin:left;transform:scaleX(var(--scroll,0));opacity:.9;pointer-events:none}
+
+/* ---- Markenzeichen: Feder fliegt ein, Buchstaben setzen sich ---- */
+.brand img{animation:mark-in 1.1s var(--out) both}
+.brand__word{display:inline-flex}
+.brand__word span{display:inline-block;animation:letter-in .8s var(--out) both;animation-delay:calc(.25s + var(--i)*45ms)}
+.brand:hover img{animation:mark-wiggle .7s var(--out)}
+@keyframes mark-in{from{opacity:0;transform:translate(-14px,10px) rotate(-28deg) scale(.7)}to{opacity:1;transform:none}}
+@keyframes letter-in{from{opacity:0;transform:translateY(55%);letter-spacing:.4em}to{opacity:1;transform:none}}
+@keyframes mark-wiggle{30%{transform:rotate(-12deg) translateX(-2px)}60%{transform:rotate(6deg)}}
+
+/* ---- Hero: Stiche laufen durch den Hintergrund, Licht folgt der Maus ---- */
+.glow{--mx:70%;--my:30%}
+.glow::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(420px circle at var(--mx) var(--my),rgba(216,189,138,.10),transparent 60%);transition:background .2s}
+.threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.55}
+.threads path{fill:none;stroke:var(--brass);stroke-width:1.4;stroke-dasharray:9 7;stroke-linecap:round}
+.threads .t-draw{stroke-dasharray:9 7;animation:sew 28s linear infinite}
+.threads .t-draw:nth-child(2){animation-duration:36s;animation-direction:reverse;opacity:.6}
+.threads .t-draw:nth-child(3){animation-duration:44s;opacity:.35}
+.threads .needle{fill:var(--champagne);offset-rotate:auto;animation:needle 14s var(--ease) infinite;filter:drop-shadow(0 0 6px rgba(216,189,138,.8))}
+@keyframes sew{to{stroke-dashoffset:-640}}
+@keyframes needle{from{offset-distance:0%}to{offset-distance:100%}}
+.hero .wrap,.page-head .wrap{position:relative;z-index:1}
+.hero-in>*{animation:rise .9s var(--out) both}
+.hero-in>*:nth-child(2){animation-delay:.35s}.hero-in>*:nth-child(3){animation-delay:.5s}.hero-in>*:nth-child(4){animation-delay:.62s}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.hero .words .w>span,.page-head .words .w>span{transition-duration:1.1s}
+
+/* ---- Laufband: genähtes Band mit allem, was wir machen ---- */
+.tape{position:relative;overflow:hidden;background:var(--brass);color:#1A1D21;transform:rotate(-1.4deg) scale(1.02);margin-block:-18px;z-index:2;box-shadow:0 10px 30px -18px rgba(0,0,0,.6)}
+.tape::before,.tape::after{content:'';position:absolute;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,rgba(26,29,33,.55) 0 8px,transparent 8px 14px)}
+.tape::before{top:7px}.tape::after{bottom:7px}
+.tape__track{display:flex;width:max-content;animation:tape 42s linear infinite}
+.tape:hover .tape__track{animation-play-state:paused}
+.tape__set{display:flex;align-items:center;flex:none}
+.tape__set span{font-weight:700;font-stretch:112%;font-size:clamp(1.05rem,1.9vw,1.4rem);letter-spacing:-.01em;padding:20px 22px;white-space:nowrap}
+.tape__set i{width:9px;height:9px;border-radius:50%;border:2px solid #1A1D21;flex:none}
+@keyframes tape{to{transform:translateX(-50%)}}
+:root[data-theme="dark"] .tape{background:var(--champagne)}
+
+/* ---- Parallax für Bildrahmen ---- */
+[data-parallax]{transform:translate3d(0,var(--py,0),0);will-change:transform}
+.frame--back[data-parallax]{transform:translate3d(0,var(--py,0),0) rotate(-2deg)}
+
+/* ---- Wegweiser: Stich zieht unter dem Titel durch ---- */
+.path h3{position:relative;display:inline}
+.path h3::after{content:'';position:absolute;left:0;bottom:-6px;width:100%;height:2px;background:var(--stitch);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--out)}
+.path a:hover h3::after,.path a:focus-visible h3::after{transform:scaleX(1)}
+.path__icon{transition:transform .5s var(--out),background .3s,color .3s}
+.path a:hover .path__icon{transform:rotate(-10deg) scale(1.08);background:var(--fjord);color:#fff}
+
+/* ---- Abschnittsnaht, die sich beim Erscheinen selbst näht ---- */
+.seam-draw{height:2px;background:var(--stitch);transform:scaleX(0);transform-origin:left;transition:transform 1.4s var(--out)}
+.seam-draw.is-visible{transform:scaleX(1)}
+
+/* ---- Großes Wort im Abschluss, Kontur wird nachgezogen ---- */
+.bigword{display:block;width:100%;height:auto;margin-top:clamp(40px,6vw,72px);overflow:visible}
+.bigword text{font-family:var(--sans);font-weight:800;font-stretch:115%;letter-spacing:-.03em;fill:transparent;stroke:var(--brass);stroke-width:1.2;stroke-dasharray:6 5;stroke-dashoffset:600}
+.bigword.is-visible text{animation:outline 3.4s var(--out) forwards}
+@keyframes outline{from{opacity:0;stroke-dashoffset:600}20%{opacity:1}to{opacity:1;stroke-dashoffset:0}}
+.js .bigword:not(.is-visible) text{opacity:0}
+
+/* ---- Abgeschlossen: Haken wird genäht ---- */
+.success-mark{animation:pop .6s var(--out) both}
+.success-mark svg{stroke-dasharray:30;stroke-dashoffset:30;animation:check .7s .25s var(--out) forwards}
+@keyframes pop{from{transform:scale(.4);opacity:0}60%{transform:scale(1.08)}to{transform:none;opacity:1}}
+@keyframes check{to{stroke-dashoffset:0}}
+
+/* ---- Arbeitsbereiche: ruhige, kurze Übergänge ---- */
+.app-main>*{animation:fade-up .45s var(--out) both}
+.app-main>*:nth-child(2){animation-delay:.05s}.app-main>*:nth-child(3){animation-delay:.1s}.app-main>*:nth-child(4){animation-delay:.15s}
+.stats .stat{animation:fade-up .5s var(--out) both}
+.stats .stat:nth-child(2){animation-delay:.06s}.stats .stat:nth-child(3){animation-delay:.12s}.stats .stat:nth-child(4){animation-delay:.18s}
+.stat__value{display:inline-block;animation:tick .7s .15s var(--out) both}
+@keyframes tick{from{opacity:0;transform:translateY(60%)}to{opacity:1;transform:none}}
+.todo li{animation:fade-up .45s var(--out) both;animation-delay:calc(var(--n,0)*60ms + .1s)}
+.todo__icon--error{animation:pulse-err 2.4s ease-in-out infinite}
+@keyframes pulse-err{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--err) 35%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
+@keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.rows>.row,.rows>.row--button{animation:fade-up .4s var(--out) both}
+.thread,.split__detail{animation:fade-up .35s var(--out) both}
+.app-nav [aria-current="page"]{position:relative}
+.app-nav [aria-current="page"]::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--fjord);animation:grow .35s var(--out)}
+@keyframes grow{from{transform:scaleY(0)}}
+@media (max-width:900px){.app-nav [aria-current="page"]::before{display:none}}
+.msg{animation:fade-up .35s var(--out) both}
+.btn{transition:background .2s var(--ease),transform .2s var(--ease),border-color .2s,box-shadow .3s}
+.btn:not(:disabled):hover{box-shadow:0 8px 24px -12px color-mix(in srgb,var(--fjord) 70%,transparent)}
+.btn--light:not(:disabled):hover{box-shadow:0 8px 24px -10px rgba(216,189,138,.55)}
+.skeleton{border-radius:var(--r-s);background:linear-gradient(90deg,var(--stone) 0%,var(--stone-2) 50%,var(--stone) 100%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+
+/* ---- Portal: Fortschritt wird genäht ---- */
+.stepper li{transition:color .4s}
+.stepper [aria-current="step"] .dot{animation:ring 2.2s ease-in-out infinite}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--fjord) 35%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
+.portal .stage,.stage{animation:fade-up .45s var(--out) both}
+
+/* ---- Grafiken laufen nur, wenn sie zu sehen sind ---- */
+[data-play] *{animation-play-state:paused!important}
+[data-play].is-visible *{animation-play-state:running!important}
+
+@media (prefers-reduced-motion:reduce){
+  .js .words .w>span{transform:none}
+  .site-header::after{display:none}
+  .tape__track{animation:none}
+  .threads,.glow::after{display:none}
+  .seam-draw{transform:none}
+  .bigword text{stroke-dashoffset:0}
+  [data-parallax]{transform:none}
+}
+@media print{.js .words .w>span{transform:none!important}.threads,.tape{display:none}}
+
+/* ---- Lichtpunkte auf den Hero-Nähten ---- */
+.threads .comet{fill:none;stroke:var(--champagne);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:22 978;stroke-dashoffset:1000;filter:drop-shadow(0 0 6px rgba(216,189,138,.9));animation:comet var(--dur,14s) linear infinite;animation-delay:var(--delay,0s)}
+@keyframes comet{to{stroke-dashoffset:0}}
+
+/* ---- Erklärgrafiken zu den Leistungen ---- */
+.sv-wrap{margin:0 0 22px;border-radius:var(--r-l);background:var(--surface);border:1px solid var(--line);padding:clamp(10px,2vw,18px);overflow:hidden}
+.band--stone .sv-wrap{background:var(--paper)}
+.sv{display:block;width:100%;height:auto;max-height:260px;margin-inline:auto}
+.sv *{transform-box:fill-box}
+/* Software: Oberfläche baut sich auf */
+.sv-frame{fill:var(--paper);stroke:var(--line)}
+.sv-bar{fill:var(--stone-2)}
+.sv-dot{fill:var(--line)}
+.sv-block{fill:var(--fjord-soft);stroke:color-mix(in srgb,var(--fjord) 30%,transparent);transform-origin:center;animation:sv-build 6s var(--out) infinite}
+.sv-block.b1{animation-delay:.1s}.sv-block.b2{animation-delay:.45s;fill:color-mix(in srgb,var(--brass) 22%,var(--paper))}.sv-block.b3{animation-delay:.8s}.sv-block.b4{animation-delay:1.1s}
+.sv-line{fill:var(--fjord);opacity:.55;transform-origin:left;animation:sv-line 6s var(--out) infinite}
+.sv-line.l2{animation-delay:.15s}.sv-line.l3{animation-delay:.3s}
+.sv-cursor{fill:var(--ink);stroke:var(--paper);stroke-width:1.2;animation:sv-cursor 6s var(--out) infinite}
+@keyframes sv-build{0%,8%{opacity:0;transform:scale(.85)}18%,85%{opacity:1;transform:none}100%{opacity:0}}
+@keyframes sv-line{0%,20%{transform:scaleX(0)}32%,85%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes sv-cursor{0%{transform:translate(300px,180px)}30%{transform:translate(270px,124px)}40%{transform:translate(270px,124px) scale(.85)}45%{transform:translate(270px,124px)}75%{transform:translate(170px,66px)}85%,100%{transform:translate(170px,66px)}}
+/* Netzwerk: Router funkt, Pakete laufen zu den Geräten */
+.sv-wave{fill:none;stroke:var(--fjord);stroke-width:1.5;transform-origin:center;opacity:0;animation:sv-wave 3.6s ease-out infinite}
+.sv-wave.w2{animation-delay:1.2s}.sv-wave.w3{animation-delay:2.4s}
+.sv-link{stroke:var(--line);stroke-width:1.5;stroke-dasharray:5 5}
+.sv-router{fill:var(--ink);}
+.sv-antenna{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.sv-device{fill:var(--surface);stroke:var(--ink-3);stroke-width:1.5;animation:sv-device 3s ease-in-out infinite;animation-delay:calc(var(--i)*.6s + .55s)}
+.sv-packet{fill:var(--brass);animation:sv-packet 3s var(--ease) infinite;animation-delay:calc(var(--i)*.6s)}
+@keyframes sv-wave{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(4.2)}}
+@keyframes sv-packet{0%{transform:none;opacity:0}10%{opacity:1}55%{transform:translate(var(--x),var(--y));opacity:1}65%,100%{transform:translate(var(--x),var(--y));opacity:0}}
+@keyframes sv-device{0%,40%,100%{stroke:var(--ink-3);fill:var(--surface)}50%,60%{stroke:var(--fjord);fill:var(--fjord-soft)}}
+/* Automatisierung: Anfrage läuft durch und wird zur Rechnung */
+.sv-flow{stroke:var(--line);stroke-width:2;stroke-dasharray:6 6;fill:none}
+.sv-flow-run{fill:none;stroke:var(--brass);stroke-width:2.5;stroke-dasharray:9 7;stroke-dashoffset:100;animation:sv-run 4.5s linear infinite}
+.sv-node rect{fill:var(--surface);stroke:var(--ink-3);stroke-width:1.5}
+.sv-node path{fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sv-node{animation:sv-node 4.5s var(--ease) infinite;transform-origin:center}
+.sv-node.n2{animation-delay:1.5s}.sv-node.n3{animation-delay:3s}
+.sv-label{font:600 12px var(--sans);fill:var(--ink-3);text-anchor:middle}
+.sv-token{fill:var(--fjord);animation:sv-token 4.5s var(--ease) infinite}
+@keyframes sv-run{to{stroke-dashoffset:-100}}
+@keyframes sv-node{0%,8%,30%,100%{transform:none}14%{transform:scale(1.08)}}
+@keyframes sv-node-c{}
+@keyframes sv-token{0%{transform:none;opacity:0}5%{opacity:1}33%{transform:translateX(110px)}45%{transform:translateX(110px)}78%{transform:translateX(220px);opacity:1}88%,100%{transform:translateX(220px);opacity:0}}
+.sv-node.n1 rect,.sv-node.n2 rect,.sv-node.n3 rect{transition:stroke .3s}
+@media (prefers-reduced-motion:reduce){.sv *{animation:none!important;opacity:1!important}}
+
+/* ---- WLAN-Grundriss ---- */
+.wifi{margin:0;display:grid;gap:12px}
+.wifi svg{width:100%;height:auto;border-radius:var(--r-l);background:var(--surface);border:1px solid var(--line)}
+.wifi__walls rect,.wifi__walls path{fill:none;stroke:var(--ink-3);stroke-width:3;stroke-linecap:round}
+.wifi__room{font:600 12px var(--sans);fill:var(--ink-3);text-anchor:middle}
+.wifi__cov{transform-box:fill-box;transform-origin:center}
+.wifi__cov.c1{animation:cov1 9s var(--ease) infinite}
+.wifi__cov.c2{animation:cov2 9s var(--ease) infinite}
+.wifi__ap rect{fill:var(--ink)}.wifi__ap circle{fill:var(--champagne)}
+.wifi__ap.a2{transform-box:fill-box;transform-origin:center;animation:ap2 9s var(--out) infinite}
+.wifi__hole circle{fill:var(--err-soft);stroke:var(--err)}.wifi__hole path{stroke:var(--err);stroke-width:2.5;stroke-linecap:round}
+.wifi__hole{animation:hole 9s var(--ease) infinite}
+.wifi figcaption{position:relative;min-height:1.6em;font-family:var(--serif);color:var(--ink-2)}
+.wifi__state{position:absolute;inset:0}
+.wifi__state.s1{animation:cap1 9s infinite}.wifi__state.s2{animation:cap2 9s infinite}
+@keyframes cov1{0%{transform:scale(.2);opacity:0}15%,100%{transform:scale(1);opacity:1}}
+@keyframes cov2{0%,48%{transform:scale(.2);opacity:0}62%,92%{transform:scale(1);opacity:1}100%{opacity:0}}
+@keyframes ap2{0%,42%{opacity:0;transform:translateY(-14px)}50%,92%{opacity:1;transform:none}100%{opacity:0}}
+@keyframes hole{0%,12%{opacity:0}20%,48%{opacity:1}56%,100%{opacity:0}}
+@keyframes cap1{0%,48%{opacity:1}52%,96%{opacity:0}100%{opacity:1}}
+@keyframes cap2{0%,48%{opacity:0}52%,96%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.wifi__cov,.wifi__ap.a2{opacity:1!important;transform:none!important}.wifi__hole,.wifi__state.s1{display:none}.wifi__state.s2{opacity:1!important;position:static}}
+
+/* ---- Videoanruf auf dem Handy ---- */
+.callmock{margin:0;display:grid;justify-items:center;gap:14px}
+.callmock__phone{width:min(240px,70vw);aspect-ratio:9/18;border-radius:34px;background:#15171B;padding:10px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6),inset 0 0 0 2px #2C3138;transform:rotate(3deg)}
+.callmock__screen{position:relative;height:100%;border-radius:26px;overflow:hidden;background:linear-gradient(170deg,#1F5C63,#20242A)}
+.callmock__ring,.callmock__live{position:absolute;inset:0;display:grid;justify-items:center;align-content:center;gap:6px;color:#EEEDE8;text-align:center}
+.callmock__ring{animation:ring-phase 8s infinite}
+.callmock__avatar{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:var(--champagne);color:#20242A;font:700 2rem var(--sans);animation:ringing 1s ease-in-out infinite}
+.callmock__ring strong{font-size:1.25rem;margin-top:8px}.callmock__ring small{color:#B5B8BD}
+.callmock__btns{display:flex;gap:48px;margin-top:44px}
+.callmock__btns span{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;font-weight:700}
+.callmock__btns .no{background:#C24B3E}.callmock__btns .yes{background:#2E8A4E;animation:yes 8s infinite}
+.callmock__live{background:linear-gradient(160deg,#D8BD8A 0%,#A9834F 100%);animation:live-phase 8s infinite}
+.callmock__face{width:96px;height:96px;border-radius:50%;background:#F4E7CF;display:grid;place-items:center;font:700 2.4rem var(--sans);color:#80602D;animation:talk 1.6s ease-in-out infinite}
+.callmock__self{position:absolute;right:12px;top:14px;width:52px;height:72px;border-radius:12px;background:#2A2F36;border:2px solid #fff}
+.callmock__time{position:absolute;top:16px;left:16px;color:#20242A;font-weight:650;font-variant-numeric:tabular-nums}
+.callmock__heart{position:absolute;bottom:40px;color:#C24B3E;font-size:1.6rem;animation:heart 8s infinite}
+.callmock figcaption{font-family:var(--serif);color:inherit;opacity:.85;text-align:center;max-width:22em}
+@keyframes ringing{0%,100%{box-shadow:0 0 0 0 rgba(216,189,138,.6)}50%{box-shadow:0 0 0 16px rgba(216,189,138,0)}}
+@keyframes ring-phase{0%,38%{opacity:1}44%,96%{opacity:0}100%{opacity:1}}
+@keyframes live-phase{0%,40%{opacity:0;transform:scale(1.06)}46%,94%{opacity:1;transform:none}100%{opacity:0}}
+@keyframes yes{0%,28%{transform:none}32%{transform:scale(.85)}36%{transform:scale(1.15)}40%{transform:none}}
+@keyframes talk{0%,100%{transform:none}50%{transform:translateY(-3px) rotate(-2deg)}}
+@keyframes heart{0%,60%{opacity:0;transform:translateY(0) scale(.6)}70%{opacity:1;transform:translateY(-20px) scale(1.1)}85%,100%{opacity:0;transform:translateY(-60px)}}
+@media (prefers-reduced-motion:reduce){.callmock__ring{display:none}.callmock__live{opacity:1!important}}
+.hero-in>.words{animation:none}
+.closing-band{position:relative;overflow:hidden}
+.threads--soft{opacity:.3}
+.band--night{position:relative}
+
+/* ---- Zettel auf den Unterseiten: Schritt für Schritt abgehakt ---- */
+.page-head .slip{animation:slip-in 1.1s .3s var(--out) both}
+@keyframes slip-in{from{opacity:0;transform:translateY(40px) rotate(4deg)}to{opacity:1;transform:rotate(-1.6deg)}}
+.page-head .slip li{animation:fade-up .5s var(--out) both;animation-delay:calc(1s + var(--k,0)*.35s)}
+.page-head .slip li:nth-child(2){--k:1}.page-head .slip li:nth-child(3){--k:2}.page-head .slip li:nth-child(4){--k:3}
+.page-head .slip li svg{animation:pop .5s var(--out) both;animation-delay:calc(1.15s + var(--k,0)*.35s)}
+.page-head .stamp{animation:stamp .5s 2.4s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes stamp{from{opacity:0;transform:rotate(-9deg) scale(2.2)}to{opacity:.85;transform:rotate(-9deg) scale(1)}}
+.big-steps .num{animation:step-glow 6s ease-in-out infinite;animation-delay:calc(1.4s + var(--k,0)*1.2s)}
+.big-steps li:nth-child(2) .num{--k:1}.big-steps li:nth-child(3) .num{--k:2}.big-steps li:nth-child(4) .num{--k:3}
+@keyframes step-glow{0%,22%,100%{box-shadow:0 0 0 0 transparent;transform:none}6%,14%{box-shadow:0 0 0 6px color-mix(in srgb,var(--brass) 45%,transparent);transform:scale(1.08)}}
+.family-aside{display:grid;gap:28px;align-content:start}
+.family-aside .callmock{justify-items:start}
+.wifi-section{align-items:center}
+@media (max-width:860px){.family-aside .callmock{justify-items:center}}
+/* Arbeitsbereiche: unter dem Seitentitel näht sich eine Linie */
+.app__head{position:relative}
+.app__head::after{content:'';position:absolute;left:0;width:min(220px,40%);bottom:-14px;height:2px;background:var(--stitch);transform-origin:left;opacity:.7;animation:seam-in 1.4s .2s var(--out) both}
+@keyframes seam-in{from{transform:scaleX(0)}}
+.app__head--sub::after{display:none}

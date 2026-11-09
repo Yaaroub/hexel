@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {Inbox,Eye,EyeOff,Send,Paperclip,FileText,Clock,Trash2,AlertTriangle,Search,ArrowLeft,StickyNote,Mail,Check} from 'lucide-react';
+import {Inbox,Eye,EyeOff,Send,Paperclip,FileText,Clock,Trash2,AlertTriangle,Search,ArrowLeft,StickyNote,Mail,Check,Phone,Activity,ThumbsUp,ThumbsDown,Receipt,Phone as Tel} from 'lucide-react';
 import {categories,getDiagnostic} from '../../lib/portal-knowledge';
 import {describeDiagnostics} from '../../lib/diagnostics-client';
 
@@ -9,14 +9,16 @@ const prioLabel={normal:'Normal',hoch:'Hoch',dringend:'Dringend'};
 const fmt=v=>new Intl.DateTimeFormat('de-DE',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v));
 const dur=m=>m>=60?Math.floor(m/60)+' h '+(m%60?m%60+' min':''):m+' min';
 const title=t=>categories.find(c=>c.id===t.category)?.title||'Vorhaben';
-const snippets=[
+const sourceBadge=s=>s==='telefon'?<span className="badge badge--muted"><Phone size={12}/>Telefon</span>:s==='ueberwachung'?<span className="badge badge--error"><Activity size={12}/>Überwachung</span>:null;
+const baseSnippets=[
  ['Rückfrage','Danke für Ihre Nachricht. Damit ich das Problem eingrenzen kann: Seit wann tritt es auf, und hat sich vorher etwas geändert (neues Gerät, Update, Routertausch)? Ein Foto der Fehlermeldung oder der Router-Lämpchen hilft mir sehr.'],
  ['Termin vor Ort','Das schaue ich mir am besten vor Ort an. Passt Ihnen einer dieser Termine: … ? Die Anfahrt und den voraussichtlichen Aufwand nenne ich Ihnen vorab.'],
  ['Fernhilfe','Das können wir wahrscheinlich per Fernhilfe lösen. Ich melde mich telefonisch und führe Sie durch die Freigabe. Sie sehen dabei jederzeit, was ich tue, und können die Verbindung beenden.'],
  ['Erledigt','Das Problem ist behoben. Was ich geändert habe: … Falls es wieder auftritt, schreiben Sie einfach hier, die Anfrage öffnet sich dann automatisch wieder.'],
 ];
 
-export default function OwnerTickets({tickets,setTickets,api,handle,mailReady,initialId}){
+export default function OwnerTickets({tickets,setTickets,api,handle,mailReady,initialId,bookingSlug,onDocument}){
+ const snippets=bookingSlug?baseSnippets.map(([l,text])=>l==='Termin vor Ort'?[l,'Das schaue ich mir am besten vor Ort an. Suchen Sie sich hier einen passenden Termin aus, die Anfrage ist schon verknüpft:\n'+(typeof location!=='undefined'?location.origin:'')+'/buchen/'+bookingSlug+'?anfrage='+(initialId||'{ID}')+'\n\nDie Anfahrt und den voraussichtlichen Aufwand nenne ich Ihnen vorab.']:[l,text]):baseSnippets;
  const [filter,setFilter]=useState('mine'),[q,setQ]=useState(''),[ticket,setTicket]=useState(null),[busy,setBusy]=useState(false),[saved,setSaved]=useState(''),[error,setError]=useState('');
  const [draft,setDraft]=useState(''),[internal,setInternal]=useState(false),[notify,setNotify]=useState(true);
  const [mins,setMins]=useState(30),[note,setNote]=useState(''),[billable,setBillable]=useState(true),[day,setDay]=useState(()=>new Date().toISOString().slice(0,10));
@@ -42,27 +44,28 @@ export default function OwnerTickets({tickets,setTickets,api,handle,mailReady,in
    <div className="segmented" style={{marginBottom:12,flexWrap:'wrap'}}>{[['mine','Bei mir',counts.mine],['open','Offen',counts.open],['done','Erledigt'],['all','Alle']].map(([id,l,n])=><button key={id} aria-pressed={filter===id} onClick={()=>setFilter(id)}>{l}{n?' ('+n+')':''}</button>)}</div>
    <label className="field" style={{marginBottom:8}}><span className="sr-only">Suchen</span><span style={{position:'relative'}}><Search size={16} style={{position:'absolute',left:12,top:16,color:'var(--ink-3)'}}/><input className="input" style={{paddingLeft:36}} value={q} onChange={e=>setQ(e.target.value)} placeholder="Nummer oder Stichwort"/></span></label>
    {shown.length===0?<div className="empty"><Inbox size={24}/><h3>{filter==='mine'?'Nichts wartet auf dich.':'Keine Anfragen in dieser Ansicht.'}</h3></div>:<div className="rows">{shown.map(x=><button className="row row--button" key={x.id} aria-pressed={t?.id===x.id} onClick={()=>open(x.id)}>
-    <div><div className="row__title">{x.priority!=='normal'&&<span className={'prio prio--'+x.priority}><AlertTriangle size={13}/>{prioLabel[x.priority]} · </span>}{title(x)}</div><div className="row__meta">{x.id} · {fmt(x.lastActivityAt)} · {x.accountType==='business'?'Betrieb':'Privat'}{x.minutes?' · '+dur(x.minutes):''}</div><div className="row__note clamp-2">{x.anonymized?'Anonymisiert':x.summary}</div></div>
+    <div><div className="row__title">{x.priority!=='normal'&&<span className={'prio prio--'+x.priority}><AlertTriangle size={13}/>{prioLabel[x.priority]} · </span>}{title(x)} {sourceBadge(x.source)}</div><div className="row__meta">{x.id} · {fmt(x.lastActivityAt)} · {x.source==='telefon'?'Anruf':x.accountType==='business'?'Betrieb':'Privat'}{x.minutes?' · '+dur(x.minutes):''}</div><div className="row__note clamp-2">{x.anonymized?'Anonymisiert':x.summary}</div></div>
     <div style={{display:'grid',gap:6,justifyItems:'end'}}><span className={'badge badge--'+stateLabel[x.status][0]}>{stateLabel[x.status][1]}</span>{x.status!=='geloest'&&<span className="badge badge--muted">{x.awaiting==='owner'?'Wartet auf dich':'Wartet auf Kunde'}</span>}</div>
    </button>)}</div>}
   </section>
 
   {t?<article className="panel thread split__detail">
    <button className="link split__back" onClick={()=>setTicket(null)}><ArrowLeft size={16}/>Alle Anfragen</button>
-   <div className="panel__head" style={{margin:0}}><div><h2>{title(t)}</h2><p>{t.id} · {fmt(t.createdAt)}{t.organizationName?' · '+t.organizationName:t.accountType==='private'?' · Privatkunde':''}</p></div>
+   <div className="panel__head" style={{margin:0}}><div><h2>{title(t)}</h2><p>{sourceBadge(t.source)} {t.id} · {fmt(t.createdAt)}{t.organizationName?' · '+t.organizationName:t.accountType==='private'?' · Privatkunde':''}</p></div>
     <div className="actions"><label className="sr-only" htmlFor="st">Stand</label><select id="st" className="input" style={{width:'auto',minHeight:38}} value={t.status} disabled={busy||t.anonymized} onChange={e=>meta({status:e.target.value})}>{Object.entries(stateLabel).map(([v,[,l]])=><option key={v} value={v}>{l}</option>)}</select><label className="sr-only" htmlFor="pr">Dringlichkeit</label><select id="pr" className="input" style={{width:'auto',minHeight:38}} value={t.priority} disabled={busy||t.anonymized} onChange={e=>meta({priority:e.target.value})}>{Object.entries(prioLabel).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></div>
    </div>
    <div className="privacy-note"><Eye size={18}/><span>Das Öffnen dieser Anfrage wurde protokolliert. Interne Notizen und markierte Dateien sieht der Kunde nicht.</span></div>
-   <dl className="kv"><div><dt>Name</dt><dd>{t.name||'–'}</dd></div><div><dt>E-Mail</dt><dd>{t.email?<a className="link" href={'mailto:'+t.email+'?subject='+encodeURIComponent('Ihre Anfrage '+t.id)}><Mail size={14}/>{t.email}</a>:'–'}</dd></div><div><dt>Ort</dt><dd>{t.location||'–'}</dd></div><div><dt>Gerät</dt><dd>{t.device||'–'}</dd></div></dl>
+   <dl className="kv"><div><dt>Name</dt><dd>{t.name||'–'}</dd></div><div><dt>E-Mail</dt><dd>{t.email?<a className="link" href={'mailto:'+t.email+'?subject='+encodeURIComponent('Ihre Anfrage '+t.id)}><Mail size={14}/>{t.email}</a>:'–'}</dd></div>{t.phone&&<div><dt>Telefon</dt><dd><a className="link" href={'tel:'+t.phone.replace(/[^+\d]/g,'')}><Tel size={14}/>{t.phone}</a></dd></div>}<div><dt>Ort</dt><dd>{t.location||'–'}</dd></div><div><dt>Gerät</dt><dd>{t.deviceLabel?t.deviceLabel+(t.device?' ('+t.device+')':''):t.device||'–'}</dd></div></dl>
+   {t.rating!=null&&<p className={'notice '+(t.rating?'notice--ok':'')}>{t.rating?<ThumbsUp size={18}/>:<ThumbsDown size={18}/>}<span>Kundenbewertung: {t.rating?'hat geholfen':'hat nicht wirklich geholfen'}{t.ratingComment?' – „'+t.ratingComment+'“':''}</span></p>}
    {t.diagnostics&&<details className="diag" open><summary>Messwerte vom Gerät des Kunden</summary><dl className="kv">{describeDiagnostics(t.diagnostics).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>{t.diagnostics.serverLatencyMs>300&&<p className="hint" style={{marginTop:8}}>Hohe Antwortzeit: Verbindung oder WLAN des Kunden wahrscheinlich schwach.</p>}</details>}
    <div className="chat-log">
     <div className="msg msg--customer"><span className="msg__who">Anfrage · {fmt(t.createdAt)}</span><p>{t.description}</p>{t.attempts?.length>0&&<p className="msg__meta">Bereits geprüft: {t.attempts.map(a=>getDiagnostic(t.category)?.steps.find(s=>s.id===a.stepId)?.title||a.stepId).join(', ')}</p>}</div>
-    {(t.messages||[]).map(m=><div key={m.id} className={'msg msg--'+(m.internal?'internal':m.author)}><span className="msg__who">{m.internal?'Interne Notiz':m.author==='owner'?'Du':'Kunde'} · {fmt(m.createdAt)}</span><p>{m.body}</p></div>)}
+    {(t.messages||[]).map(m=><div key={m.id} className={'msg msg--'+(m.internal?'internal':m.author)}><span className="msg__who">{m.internal?'Interne Notiz':m.author==='owner'?'Du':m.author==='system'?'Automatisch':'Kunde'} · {fmt(m.createdAt)}</span><p>{m.body}</p></div>)}
     <span ref={end}/>
    </div>
    {t.attachments?.length>0&&<div className="files">{t.attachments.map(f=><a key={f.id} className={'file'+(f.internal?' is-internal':'')} href={'/api/attachments/'+f.id} target="_blank" rel="noreferrer">{f.mime.startsWith('image/')?<img src={'/api/attachments/'+f.id} alt="" loading="lazy"/>:<span className="file__icon"><FileText size={20}/></span>}<span><strong>{f.filename}</strong><small>{f.author==='owner'?'Von dir':'Vom Kunden'}{f.internal?' · intern':''}</small></span></a>)}</div>}
    {t.anonymized?<p className="notice"><EyeOff size={18}/>Diese Anfrage wurde nach Ablauf der Frist anonymisiert.</p>:<form className="form composer" onSubmit={send}>
-    <div className="actions" style={{gap:8}}>{snippets.map(([l,text])=><button type="button" key={l} className="mini-btn" onClick={()=>setDraft(d=>d?d+'\n\n'+text:text)}>{l}</button>)}</div>
+    <div className="actions" style={{gap:8}}>{snippets.map(([l,text])=><button type="button" key={l} className="mini-btn" onClick={()=>{const x=text.replace(/anfrage=[^\n]*/,'anfrage='+t.id);setDraft(d=>d?d+'\n\n'+x:x)}}>{l}</button>)}</div>
     <label className="field"><span className="sr-only">Nachricht</span><textarea rows={4} maxLength={4000} value={draft} onChange={e=>setDraft(e.target.value)} placeholder={internal?'Nur für dich: Beobachtungen, Zugangswege, To-dos':'Antwort an den Kunden'} style={internal?{background:'var(--warn-soft)'}:undefined}/></label>
     <div className="actions" style={{gap:'10px 20px'}}>
      <label className="check toggle-note"><input type="checkbox" checked={internal} onChange={e=>setInternal(e.target.checked)}/><span><StickyNote size={14} style={{display:'inline',verticalAlign:-2}}/> Interne Notiz</span></label>
@@ -75,7 +78,8 @@ export default function OwnerTickets({tickets,setTickets,api,handle,mailReady,in
 
    <section style={{borderTop:'1px solid var(--line)',paddingTop:16,display:'grid',gap:12}}>
     <div className="time-total"><h3 className="h3" style={{fontSize:'1.05rem'}}><Clock size={16} style={{display:'inline',verticalAlign:-2}}/> Arbeitszeit</h3><b>{dur(total)}</b></div>
-    {(t.time||[]).length>0&&<div className="rows">{t.time.map(e=><div className="row" key={e.id}><div><div className="row__title">{dur(e.minutes)}{!e.billable&&<span className="hint"> · nicht abrechenbar</span>}</div><div className="row__meta">{new Date(e.date+'T12:00:00').toLocaleDateString('de-DE')}{e.note?' · '+e.note:''}</div></div><button className="mini-btn mini-btn--danger" aria-label="Eintrag entfernen" disabled={busy} onClick={()=>delTime(e.id)}><Trash2 size={14}/></button></div>)}</div>}
+    {(t.time||[]).length>0&&<div className="rows">{t.time.map(e=><div className="row" key={e.id}><div><div className="row__title">{dur(e.minutes)}{!e.billable&&<span className="hint"> · nicht abrechenbar</span>}</div><div className="row__meta">{new Date(e.date+'T12:00:00').toLocaleDateString('de-DE')}{e.note?' · '+e.note:''}{e.billedIn?' · berechnet in '+e.billedIn:''}</div></div>{!e.billedIn&&<button className="mini-btn mini-btn--danger" aria-label="Eintrag entfernen" disabled={busy} onClick={()=>delTime(e.id)}><Trash2 size={14}/></button>}</div>)}</div>}
+    {!t.anonymized&&onDocument&&<div className="actions">{(t.time||[]).some(e=>e.billable&&!e.billedIn)&&<button className="mini-btn" onClick={()=>onDocument({type:'rechnung',ticketId:t.id,fromTime:true})}><Receipt size={14}/>Rechnung aus offenen Zeiten</button>}<button className="mini-btn" onClick={()=>onDocument({type:'angebot',ticketId:t.id})}><FileText size={14}/>Angebot zu dieser Anfrage</button></div>}
     {!t.anonymized&&<form className="form" onSubmit={addTime} style={{gap:10}}>
      <div className="actions" style={{gap:8}}>{[15,30,45,60,90].map(m=><button type="button" key={m} className="mini-btn" aria-pressed={Number(mins)===m} style={Number(mins)===m?{borderColor:'var(--fjord)',color:'var(--fjord)'}:undefined} onClick={()=>setMins(m)}>{dur(m)}</button>)}<input className="input" type="number" min={1} max={1440} value={mins} onChange={e=>setMins(e.target.value)} style={{width:90,minHeight:36}} aria-label="Minuten"/></div>
      <div className="form-grid"><input className="input" value={note} onChange={e=>setNote(e.target.value)} maxLength={300} placeholder="Was wurde gemacht? (optional)" aria-label="Notiz"/><input className="input" type="date" value={day} onChange={e=>setDay(e.target.value)} aria-label="Datum"/></div>

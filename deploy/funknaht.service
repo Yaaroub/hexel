@@ -1,0 +1,23 @@
+# /etc/systemd/system/funknaht.service
+[Unit]
+Description=FUNKNAHT Website und Portal
+After=network.target
+
+[Service]
+Type=simple
+User=funknaht
+Group=funknaht
+WorkingDirectory=/opt/funknaht
+EnvironmentFile=/opt/funknaht/.env.local
+ExecStart=/usr/bin/node /opt/funknaht/node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3000
+Restart=always
+RestartSec=5
+# Schutz: Dienst darf nur in seinen eigenen Ordner schreiben
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/funknaht/.local /opt/funknaht/.next
+
+[Install]
+WantedBy=multi-user.target

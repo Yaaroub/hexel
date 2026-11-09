@@ -1,7 +1,7 @@
 import {DatabaseSync} from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,randomBytes} from 'node:crypto';
 import {getEffectivePlan,getPlan,hasFeature} from './business-plans.js';
 
 let connection;
@@ -38,6 +38,16 @@ export function getDb(){
  CREATE INDEX IF NOT EXISTS ticket_attachments_ticket ON ticket_attachments(ticket_id);
  CREATE TABLE IF NOT EXISTS ticket_time(id TEXT PRIMARY KEY,ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,minutes INTEGER NOT NULL,note TEXT NOT NULL DEFAULT '',billable INTEGER NOT NULL DEFAULT 1,work_date TEXT NOT NULL,created_at TEXT NOT NULL);
  CREATE INDEX IF NOT EXISTS ticket_time_ticket ON ticket_time(ticket_id);
+ CREATE TABLE IF NOT EXISTS callbacks(id TEXT PRIMARY KEY,name TEXT NOT NULL,phone TEXT NOT NULL,topic TEXT NOT NULL DEFAULT '',time_window TEXT NOT NULL DEFAULT '',note TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'neu',ticket_id TEXT,created_at INTEGER NOT NULL,done_at INTEGER);
+ CREATE TABLE IF NOT EXISTS devices(id TEXT PRIMARY KEY,organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,kind TEXT NOT NULL,label TEXT NOT NULL,vendor TEXT NOT NULL DEFAULT '',model TEXT NOT NULL DEFAULT '',location TEXT NOT NULL DEFAULT '',serial TEXT NOT NULL DEFAULT '',firmware TEXT NOT NULL DEFAULT '',installed_on TEXT,warranty_until TEXT,notes TEXT NOT NULL DEFAULT '',qr_token TEXT NOT NULL UNIQUE,created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);
+ CREATE INDEX IF NOT EXISTS devices_org ON devices(organization_id);
+ CREATE TABLE IF NOT EXISTS documents(id TEXT PRIMARY KEY,number TEXT NOT NULL UNIQUE,type TEXT NOT NULL CHECK(type IN ('angebot','rechnung')),organization_id TEXT REFERENCES organizations(id) ON DELETE SET NULL,ticket_id TEXT,recipient TEXT NOT NULL,items TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL DEFAULT 'entwurf',issued_on TEXT,due_on TEXT,intro TEXT NOT NULL DEFAULT '',notes TEXT NOT NULL DEFAULT '',settings TEXT NOT NULL DEFAULT '{}',responded_at INTEGER,created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);
+ CREATE INDEX IF NOT EXISTS documents_org ON documents(organization_id);
+ CREATE TABLE IF NOT EXISTS owner_settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+ CREATE TABLE IF NOT EXISTS monitors(id TEXT PRIMARY KEY,organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,kind TEXT NOT NULL CHECK(kind IN ('website','heartbeat')),label TEXT NOT NULL,url TEXT NOT NULL DEFAULT '',token TEXT UNIQUE,interval_minutes INTEGER NOT NULL DEFAULT 5,state TEXT NOT NULL DEFAULT 'unbekannt',fail_count INTEGER NOT NULL DEFAULT 0,last_checked_at INTEGER,last_ok_at INTEGER,last_change_at INTEGER,ssl_expires_at INTEGER,last_error TEXT NOT NULL DEFAULT '',ticket_id TEXT,created_at INTEGER NOT NULL);
+ CREATE TABLE IF NOT EXISTS notices(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT NULL DEFAULT '',level TEXT NOT NULL DEFAULT 'info',area TEXT NOT NULL DEFAULT '',starts_at INTEGER NOT NULL,ends_at INTEGER,created_at INTEGER NOT NULL);
+ CREATE TABLE IF NOT EXISTS account_links(id TEXT PRIMARY KEY,organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,user_id TEXT REFERENCES users(id) ON DELETE CASCADE,token_hash TEXT NOT NULL UNIQUE,label TEXT NOT NULL DEFAULT '',created_at INTEGER NOT NULL,expires_at INTEGER NOT NULL,accepted_at INTEGER);
+ CREATE TABLE IF NOT EXISTS team_invites(id TEXT PRIMARY KEY,organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,email TEXT NOT NULL,role TEXT NOT NULL,token_hash TEXT NOT NULL UNIQUE,created_at INTEGER NOT NULL,expires_at INTEGER NOT NULL,accepted_at INTEGER);
  CREATE TABLE IF NOT EXISTS owner_audit(id TEXT PRIMARY KEY,actor_user_id TEXT NOT NULL,action TEXT NOT NULL,target TEXT,created_at INTEGER NOT NULL);
  CREATE INDEX IF NOT EXISTS owner_audit_time ON owner_audit(created_at);
  `);
@@ -57,6 +67,17 @@ function migrate(db){
  add('support_tickets','awaiting',"TEXT NOT NULL DEFAULT 'owner'");
  add('support_tickets','diagnostics','TEXT');
  add('support_tickets','last_activity_at','TEXT');
+ add('users','role',"TEXT NOT NULL DEFAULT 'inhaber'");
+ add('organizations','calendar_token','TEXT');
+ add('appointments','manage_token','TEXT');
+ add('appointments','reminder_sent_at','INTEGER');
+ add('support_tickets','source',"TEXT NOT NULL DEFAULT 'portal'");
+ add('support_tickets','rating','INTEGER');
+ add('support_tickets','rating_comment','TEXT');
+ add('support_tickets','rating_public','INTEGER NOT NULL DEFAULT 0');
+ add('support_tickets','device_id','TEXT');
+ add('ticket_time','document_id','TEXT');
+ db.exec('CREATE UNIQUE INDEX IF NOT EXISTS appointments_manage ON appointments(manage_token)');
  // Version 3: single replies become the first owner message of a conversation.
  if((db.prepare('PRAGMA user_version').get()?.user_version||0)<3){
   for(const row of db.prepare("SELECT id,reply,replied_at,updated_at FROM support_tickets WHERE reply IS NOT NULL AND reply<>''").all()){
@@ -64,12 +85,12 @@ function migrate(db){
   }
   db.exec("UPDATE support_tickets SET last_activity_at=COALESCE(last_activity_at,updated_at)");
  }
- db.exec('PRAGMA user_version=3');
+ db.exec('PRAGMA user_version=4');
 }
 export function closeDb(){connection?.close();connection=undefined}
 export function transaction(fn){const db=getDb();db.exec('BEGIN IMMEDIATE');try{const result=fn(db);db.exec('COMMIT');return result}catch(error){db.exec('ROLLBACK');throw error}}
 export function newId(){return randomUUID()}
-export const defaultSettings={workingDays:[1,2,3,4,5],openTime:'09:00',closeTime:'17:00',slotMinutes:30,bookingEnabled:true,timezone:'Europe/Berlin'};
+export const defaultSettings={workingDays:[1,2,3,4,5],openTime:'09:00',closeTime:'17:00',slotMinutes:30,bookingEnabled:true,reminders:true,timezone:'Europe/Berlin'};
 export function getSettings(organization){let stored={};try{stored=JSON.parse(organization.settings_json||'{}')}catch{}return {...defaultSettings,...stored,timezone:'Europe/Berlin'}}
 
 function fail(message,status=400,code='INVALID_REQUEST'){throw Object.assign(new Error(message),{status,code})}
@@ -113,7 +134,7 @@ export function createAppointment(orgId,data,{publicBooking=false}={}){
   if(db.prepare("SELECT id FROM appointments WHERE organization_id=? AND status!='cancelled' AND starts_at<? AND ends_at>? LIMIT 1").get(orgId,end,start))fail('Dieser Termin wurde inzwischen belegt. Bitte wählen Sie eine andere Zeit.',409,'BOOKING_CONFLICT');
   let client=null;if(data.clientId){client=db.prepare('SELECT * FROM clients WHERE id=? AND organization_id=?').get(data.clientId,orgId);if(!client)fail('Kunde nicht gefunden.',404,'CLIENT_NOT_FOUND')}
   const name=text(data.customerName??data.name??client?.name,{required:true,max:150}),mail=email(data.customerEmail??data.email??client?.email,publicBooking),phone=text(data.customerPhone??data.phone??client?.phone,{max:80}),notes=text(data.notes,{max:2000}),id=newId(),now=Date.now();
-  db.prepare('INSERT INTO appointments(id,organization_id,service_id,client_id,customer_name,customer_email,customer_phone,notes,starts_at,ends_at,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)').run(id,orgId,service.id,client?.id||null,name,mail,phone,notes,start,end,'pending',now,now);
+  db.prepare('INSERT INTO appointments(id,organization_id,service_id,client_id,customer_name,customer_email,customer_phone,notes,starts_at,ends_at,status,manage_token,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(id,orgId,service.id,client?.id||null,name,mail,phone,notes,start,end,'pending',randomBytes(24).toString('base64url'),now,now);
   return {ok:true,id,appointment:{id,startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),status:'pending'}};
  });
 }
@@ -153,6 +174,7 @@ export function mutateBusiness(orgId,data){
    if(data.openTime!==undefined){minutes(data.openTime);settings.openTime=data.openTime}if(data.closeTime!==undefined){minutes(data.closeTime);settings.closeTime=data.closeTime}if(minutes(settings.openTime)>=minutes(settings.closeTime))fail('Das Ende muss nach dem Beginn liegen.');
    if(data.slotMinutes!==undefined)settings.slotMinutes=integer(data.slotMinutes,5,120,'Zeitraster');if(settings.slotMinutes%5!==0)fail('Das Zeitraster muss in Schritten von fünf Minuten angegeben werden.');
    if(data.bookingEnabled!==undefined){if(typeof data.bookingEnabled!=='boolean')fail('Der Buchungsstatus ist ungültig.');settings.bookingEnabled=data.bookingEnabled}
+   if(data.reminders!==undefined){if(typeof data.reminders!=='boolean')fail('Die Einstellung für Erinnerungen ist ungültig.');settings.reminders=data.reminders}
    const name=data.name===undefined?org.name:text(data.name,{required:true,max:150}),slug=data.slug===undefined?org.slug:text(data.slug,{required:true,max:64});if(!/^[a-z0-9](?:[a-z0-9-]{1,62}[a-z0-9])$/.test(slug))fail('Die Buchungsadresse benötigt 3 bis 64 kleine Buchstaben, Ziffern oder Bindestriche.');
    if(db.prepare('SELECT id FROM organizations WHERE slug=? AND id!=?').get(slug,orgId))fail('Diese Buchungsadresse wird bereits verwendet.',409,'SLUG_EXISTS');db.prepare('UPDATE organizations SET name=?,slug=?,settings_json=? WHERE id=?').run(name,slug,JSON.stringify(settings),orgId);return {ok:true};
   }

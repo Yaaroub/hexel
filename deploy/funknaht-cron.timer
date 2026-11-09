@@ -1,0 +1,11 @@
+# /etc/systemd/system/funknaht-cron.timer
+[Unit]
+Description=FUNKNAHT geplante Aufgaben alle 5 Minuten
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

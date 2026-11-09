@@ -1,0 +1,3 @@
+import {WifiOff} from 'lucide-react';
+export const metadata={title:'Keine Verbindung | FUNKNAHT'};
+export default function Offline(){return <section className="band"><div className="wrap" style={{maxWidth:640}}><WifiOff size={36} color="var(--brass)"/><h1 className="h2" style={{marginTop:16}}>Gerade keine Internetverbindung.</h1><p className="prose" style={{marginTop:16}}>Prüfen Sie, ob WLAN oder mobile Daten eingeschaltet sind. Sobald die Verbindung wieder steht, laden Sie die Seite neu.</p><p className="prose" style={{marginTop:12}}>Wenn das Internet zu Hause oder im Betrieb ganz ausgefallen ist, rufen Sie uns gern an.</p></div></section>}

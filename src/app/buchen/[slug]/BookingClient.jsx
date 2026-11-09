@@ -8,6 +8,8 @@ const dayLabel=d=>new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',
 const money=v=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v/100);
 
 export default function BookingClient({slug}){
+ const [refNote,setRefNote]=useState('');
+ useEffect(()=>{const a=new URLSearchParams(location.search).get('anfrage')||'';if(/^FN-[A-F0-9]{8}$/.test(a))setRefNote('Zu Anfrage '+a)},[]);
  const [data,setData]=useState(null),[serviceId,setServiceId]=useState(''),[day,setDay]=useState(today),[slot,setSlot]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[done,setDone]=useState(null),[rev,setRev]=useState(0);
  useEffect(()=>{let live=true;const c=new AbortController();setLoading(true);setError('');setSlot('');
   fetch('/api/business/booking?'+new URLSearchParams({slug,date:day,...(serviceId?{serviceId}:{})}),{signal:c.signal,cache:'no-store'}).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.error||'Diese Buchungsseite ist gerade nicht erreichbar.');if(!live)return;setData(d);if(!serviceId&&d.services?.length)setServiceId(d.services.find(s=>s.active!==false)?.id||'')}).catch(e=>{if(live&&e.name!=='AbortError')setError(e.message)}).finally(()=>{if(live)setLoading(false)});
@@ -41,7 +43,7 @@ export default function BookingClient({slug}){
      <label className="field">Name<input name="name" autoComplete="name" required maxLength={150}/></label>
      <label className="field">E-Mail<input name="email" type="email" autoComplete="email" required maxLength={254}/></label>
      <label className="field"><span>Telefon <span className="field__opt">(optional)</span></span><input name="phone" type="tel" autoComplete="tel" maxLength={80}/></label>
-     <label className="field"><span>Hinweis an den Betrieb <span className="field__opt">(optional)</span></span><textarea name="notes" rows={3} maxLength={2000} placeholder="z. B. Anfahrt, Zugang, worum es geht"/></label>
+     <label className="field"><span>Hinweis an den Betrieb <span className="field__opt">(optional)</span></span><textarea name="notes" rows={3} maxLength={2000} defaultValue={refNote} key={refNote} placeholder="z. B. Anfahrt, Zugang, worum es geht"/></label>
      {error&&<p className="notice notice--error" role="alert"><AlertCircle size={18}/>{error}</p>}
      <p className="hint">Ihre Angaben gehen an {name||'den Betrieb'} und werden nur für diesen Termin verwendet.</p>
      <button className="btn" style={{width:'100%'}}>{busy?'Wird gesendet …':'Termin anfragen'}<ArrowRight size={17}/></button>

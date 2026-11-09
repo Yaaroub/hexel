@@ -2,6 +2,35 @@
 // und ersetzen keine Prüfung des konkreten Geräts oder Systems.
 export const categories = [
   {
+    id: 'betrug',
+    title: 'Ist das Betrug?',
+    description: 'Verdächtige Anrufe, SMS, E-Mails oder Messenger-Nachrichten prüfen lassen, bevor Sie reagieren.',
+    icon: 'shield',
+    steps: [
+      {
+        id: 'nicht-reagieren',
+        title: 'Erst einmal nichts tun',
+        instruction: 'Tippen Sie keinen Link an, rufen Sie keine angegebene Nummer zurück, installieren Sie nichts und nennen Sie niemandem Codes, PIN oder TAN. Echte Banken, Behörden und Firmen fragen nie danach.',
+        verify: 'Haben Sie schon etwas angeklickt, Daten eingegeben, eine App installiert oder Geld überwiesen?',
+        escalateWhen: 'Wenn Sie Bankdaten, PIN oder TAN eingegeben oder Geld überwiesen haben: Rufen Sie sofort Ihre Bank an (Nummer auf der Bankkarte) oder den Sperr-Notruf 116 116. Danach senden Sie uns die Anfrage.',
+      },
+      {
+        id: 'gegenpruefen',
+        title: 'Auf einem anderen Weg nachfragen',
+        instruction: 'Schreibt angeblich ein Familienmitglied von einer neuen Nummer, rufen Sie es unter der alten, bekannten Nummer an. Bei Bank, Paketdienst oder Behörde nutzen Sie die eigene App oder die Nummer von der offiziellen Website, nie die aus der Nachricht.',
+        verify: 'Hat die Person oder Firma bestätigt, dass die Nachricht von ihr stammt?',
+        escalateWhen: 'Wenn Sie niemanden erreichen oder unsicher bleiben, schicken Sie uns ein Bildschirmfoto der Nachricht.',
+      },
+      {
+        id: 'festhalten',
+        title: 'Bildschirmfoto machen, nichts löschen',
+        instruction: 'Machen Sie ein Bildschirmfoto, auf dem Absender und Text zu sehen sind. Bewahren Sie die Nachricht vorerst auf, sie kann als Beweis wichtig sein.',
+        verify: 'Sind Absender (Nummer oder E-Mail-Adresse) und der Text auf dem Bild zu erkennen?',
+        escalateWhen: 'Wenn Geld abgeflossen ist, erstatten Sie zusätzlich Anzeige bei der Polizei. Das geht auch online über die Onlinewache.',
+      },
+    ],
+  },
+  {
     id: 'internet-wlan',
     title: 'Internet & WLAN',
     description: 'Eingrenzen, ob die Verbindung, ein bestimmtes Gerät oder ein einzelner Dienst betroffen ist.',
@@ -230,6 +259,7 @@ function normalize(value) {
 // This intentionally small rule set is a suggestion, not a diagnosis. A tie or
 // unrelated description stays unassigned so the visitor can choose explicitly.
 export function classifyIssue(description) {
+  if (/\b(betrug|betrüger|phishing|verdächtig\w*|enkeltrick|abzocke|ist das echt|fake)\b/i.test(String(description || ''))) return 'betrug';
   let text = normalize(description).trim();
   if (!text) return null;
   // Explicit exclusions should not select the very category being ruled out.

@@ -13,16 +13,25 @@ export default function Datenschutz(){
    <p>Beim Aufruf verarbeitet der Server technisch notwendige Daten wie IP-Adresse, Zeitpunkt und angefragte Seite, um die Website auszuliefern und vor Missbrauch zu schützen (Art. 6 Abs. 1 lit. f DSGVO). Schriften werden von unserem eigenen Server geladen; es werden keine Inhalte von Google oder anderen Drittanbietern eingebunden. Hosting-Anbieter: <Gap>Anbieter und Standort des Servers</Gap>.</p>
 
    <h2>3. Cookies und lokaler Speicher</h2>
-   <p>Wir setzen ausschließlich ein technisch notwendiges Sitzungs-Cookie, wenn Sie sich anmelden. Es enthält eine zufällige Kennung und läuft nach sieben Tagen oder beim Abmelden ab. Ihre Wahl zwischen heller und dunkler Darstellung wird im lokalen Speicher Ihres Browsers abgelegt und nicht an uns übertragen. Eine Einwilligung ist dafür nicht erforderlich (§ 25 Abs. 2 TDDDG).</p>
+   <p>Wir setzen ausschließlich ein technisch notwendiges Sitzungs-Cookie, wenn Sie sich anmelden. Es enthält eine zufällige Kennung und läuft nach sieben Tagen oder beim Abmelden ab. Ihre Wahl zwischen heller und dunkler Darstellung und die gewählte Schriftgröße werden im lokalen Speicher Ihres Browsers abgelegt und nicht an uns übertragen. Damit die Seite auch bei schwacher Verbindung schnell lädt und als App aufs Handy gelegt werden kann, speichert Ihr Browser einige allgemeine Seitenbestandteile (keine persönlichen Daten) zwischen. Eine Einwilligung ist dafür nicht erforderlich (§ 25 Abs. 2 TDDDG).</p>
 
    <h2>4. Kontaktformular</h2>
    <p>Ihre Angaben (Name, E-Mail, optional Unternehmen und Ort, Ihre Nachricht) verwenden wir zur Beantwortung Ihrer Anfrage und zur Anbahnung eines Auftrags (Art. 6 Abs. 1 lit. b DSGVO). Die Nachricht wird per E-Mail an uns übermittelt. E-Mail-Anbieter: <Gap>Anbieter des Postfachs</Gap>.</p>
 
+   <h3>Rückrufwunsch</h3>
+   <p>Bitten Sie um einen Rückruf, speichern wir Name, Telefonnummer, das Thema und Ihre Wunschzeit, um Sie zurückzurufen (Art. 6 Abs. 1 lit. b DSGVO). Erledigte Rückrufwünsche löschen wir nach 90 Tagen, unbearbeitete spätestens nach 180 Tagen.</p>
+
    <h2>5. Konto, Hilfe-Portal und Betriebsportal</h2>
    <p>Für ein Konto speichern wir Name, E-Mail-Adresse und Ihr Passwort ausschließlich als nicht umkehrbaren Hash. Anfragen im Hilfe-Portal speichern wir mit Ihrer Beschreibung, den durchgeführten Prüfschritten und Ihren Kontaktdaten, um Ihnen zu helfen (Art. 6 Abs. 1 lit. b DSGVO).</p>
    <p>Kunden, Termine und Aufträge, die ein Betrieb im Betriebsportal verwaltet, verarbeiten wir im Auftrag dieses Betriebs (Art. 28 DSGVO). Wir sehen diese Inhalte nicht ein; in unserer Verwaltung erscheinen nur Anzahlen.</p>
+   <h3>Geräte, Belege und Überwachung</h3>
+   <p>Betreuen wir Ihre Technik, führen wir eine Geräteakte (Art, Hersteller, Modell, Standort, Garantie, Software-Stand; niemals Passwörter). Ein QR-Aufkleber am Gerät enthält nur einen zufälligen Schlüssel, keine persönlichen Daten. Angebote und Rechnungen sehen Sie in Ihrem Konto. Haben Sie eine Überwachung beauftragt, prüfen wir in regelmäßigen Abständen die Erreichbarkeit Ihrer Website und die Gültigkeit ihres Zertifikats oder empfangen ein Lebenszeichen Ihres Routers; dabei speichern wir nur Zeitpunkt, Ergebnis und ggf. die Fehlermeldung (Art. 6 Abs. 1 lit. b DSGVO).</p>
+   <h3>Termine und Erinnerungen</h3>
+   <p>Buchen Sie einen Termin, erhalten Sie einen persönlichen Link, über den Sie den Termin ansehen, absagen oder in Ihren Kalender übernehmen. Hat der Betrieb Erinnerungen eingeschaltet, senden wir Ihnen am Vortag eine E-Mail.</p>
+   <h3>Angehörige und Mitarbeitende</h3>
+   <p>Sie können Angehörige einladen, Ihre Anfragen in Ihrem Namen zu stellen und zu verfolgen, und diesen Zugang jederzeit wieder entziehen. Betriebe können Mitarbeitende mit eingeschränkten Rechten einladen. Einladungslinks verfallen nach 7 bzw. 14 Tagen; gespeichert wird nur ein Hash des Links. Bitten Sie um Rückmeldung zu einer erledigten Anfrage, speichern wir Ihre Bewertung zusammen mit der Anfrage.</p>
    <h3>Aufbewahrung</h3>
-   <ul><li>Erledigte Portal-Anfragen werden nach 180 Tagen anonymisiert.</li><li>Abgelaufene Sitzungen werden automatisch gelöscht.</li><li>Unser internes Zugriffsprotokoll wird nach 365 Tagen gelöscht.</li><li>Kontodaten bleiben bis zur Löschung des Kontos bestehen. Gesetzliche Aufbewahrungspflichten für Rechnungen bleiben unberührt.</li></ul>
+   <ul><li>Erledigte Portal-Anfragen werden nach 180 Tagen anonymisiert.</li><li>Abgelaufene Sitzungen werden automatisch gelöscht.</li><li>Unser internes Zugriffsprotokoll wird nach 365 Tagen gelöscht.</li><li>Erledigte Rückrufwünsche werden nach 90 Tagen gelöscht.</li><li>Kontodaten bleiben bis zur Löschung des Kontos bestehen. Rechnungen bewahren wir wegen gesetzlicher Pflichten (§ 147 AO, § 257 HGB) bis zu acht bzw. zehn Jahre auf.</li></ul>
    <h3>Export und Löschung</h3>
    <p>Unter „Konto“ können Sie alle gespeicherten Daten als Datei herunterladen und Ihr Konto mit allen zugehörigen Daten löschen.</p>
 

@@ -1,0 +1,108 @@
+/* ==========================================================================
+   FUNKNAHT – Richtung „Blaupause“
+   Tiefes Petrol mit Konstruktionsraster, Pauspapier für helle Flächen,
+   Messing als Akzent. Präzise Kanten statt runder Pillen, Blattbeschriftungen
+   an Rahmen. Wird nach allen anderen Stilen geladen und überschreibt sie.
+   ========================================================================== */
+:root:root{
+  --ink:#10282B;--ink-2:#3B5457;--ink-3:#5A7174;
+  --paper:#EFF4F3;--surface:#FFFFFF;--stone:#E2EBE9;--stone-2:#D2DFDC;--line:#BFD0CD;
+  --brass:#A9834F;--brass-text:#7A5A28;--champagne:#D8BD8A;
+  --fjord:#0F4B51;--fjord-hover:#0A3A3F;--fjord-soft:#D9E9E7;
+  --night:#0D3539;--night-2:#124248;--night-line:#2A5C61;
+  --on-night:#EEF5F4;--on-night-2:#A9C6C4;
+  --r-s:4px;--r-m:6px;--r-l:10px;
+  --grid-dark:#1C4B50;--grid-light:#DCE6E4;
+  --stitch:repeating-linear-gradient(90deg,var(--brass) 0 9px,transparent 9px 16px);
+}
+:root:root[data-theme="dark"]{
+  --ink:#E4EEED;--ink-2:#A9C0BE;--ink-3:#7F9997;
+  --paper:#061A1D;--surface:#0B2427;--stone:#082023;--stone-2:#113034;--line:#1E4247;
+  --brass:#C9A56E;--brass-text:#D8BD8A;
+  --fjord:#7CC3C4;--fjord-hover:#9AD3D4;--fjord-soft:#12373B;
+  --night:#04171A;--night-2:#0A2427;--night-line:#1B4247;
+  --grid-dark:#0D2D31;--grid-light:#0D2A2E;
+}
+/* ---- Raster: dunkle Flächen wie Blaupause, helle wie Pauspapier ---- */
+html .hero,html .page-head,html .band--night,html .site-footer{background-color:var(--night);background-image:linear-gradient(var(--grid-dark) 1px,transparent 1px),linear-gradient(90deg,var(--grid-dark) 1px,transparent 1px);background-size:48px 48px;background-position:-1px -1px}
+html .hero::before{background:radial-gradient(50% 60% at 85% 35%,rgba(216,189,138,.10),transparent 70%)}
+html .band--stone,html .pflow-page,html body:has(.app){background-color:var(--stone);background-image:linear-gradient(var(--grid-light) 1px,transparent 1px),linear-gradient(90deg,var(--grid-light) 1px,transparent 1px);background-size:48px 48px}
+html .site-header{background:var(--night);border-bottom-color:var(--night-line)}
+/* ---- Typo: Akzentwort in Messing mit genähter Unterlinie ---- */
+html .w--accent>span{color:var(--champagne)}
+html .w--accent{background:repeating-linear-gradient(90deg,var(--champagne) 0 10px,transparent 10px 16px) left bottom/100% 4px no-repeat;padding-bottom:.1em!important}
+html .band:not(.band--night) .w--accent>span{color:var(--brass)}
+html .hero .display{font-size:clamp(3rem,7.4vw,6.6rem);font-stretch:76%;font-weight:760;max-width:10.5em}
+/* ---- Knöpfe und Bedienelemente: präzise Kanten ---- */
+html .btn{border-radius:var(--r-m);font-weight:650;letter-spacing:.005em}
+html .btn--light{background:var(--champagne);color:var(--night)}
+html .btn--light:hover{background:#E6CFA2}
+html .btn--ghost{border-width:1.5px;border-color:color-mix(in srgb,currentColor 45%,transparent)}
+html .hero .btn--ghost,html .page-head .btn--ghost,html .band--night .btn--ghost{color:var(--on-night);border-color:#6E9A9C}
+:root:root[data-theme="dark"] .btn--light{color:#04171A}
+html .tag,html .badge,html .mini-btn,html .chip{border-radius:var(--r-s)}
+html .nav a{border-radius:var(--r-s)}
+html .nav a[aria-current]::after{background:repeating-linear-gradient(90deg,var(--champagne) 0 6px,transparent 6px 10px)}
+html .icon-btn{border-radius:var(--r-s);border-color:#3D6E73}
+html .header-portal{border-radius:var(--r-s);border-style:solid;border-color:#3D6E73}
+html .header-cta{border-radius:var(--r-s)}
+html .segmented,html .segmented button{border-radius:var(--r-s)}
+html input,html select,html textarea{border-radius:var(--r-s)!important}
+/* ---- Blattbeschriftung an Rahmen: „BLATT 01 · …“ ---- */
+html [data-sheet]{position:relative}
+html [data-sheet]::before{content:attr(data-sheet);position:absolute;top:-10px;left:18px;z-index:2;padding:0 10px;font:650 .7rem/20px var(--sans);letter-spacing:.12em;color:var(--brass-text);background:var(--sheet-bg,var(--paper))}
+html .hero [data-sheet]::before,html .band--night [data-sheet]::before,html .page-head [data-sheet]::before{color:var(--champagne);--sheet-bg:var(--night);background:var(--night)}
+html .band--stone [data-sheet]::before{background:var(--stone)}
+/* ---- Hero-Werkbank als Zeichnungsblatt ---- */
+html .bench{border-radius:var(--r-m);border:1.5px solid #4F7F83;box-shadow:0 40px 80px -50px rgba(0,0,0,.7)}
+html .dims{position:absolute;right:var(--gutter);top:18px;font:500 .72rem var(--mono);color:#5E8C8F;letter-spacing:.04em;z-index:1}
+@media (max-width:900px){html .dims{display:none}
+}
+/* ---- Laufband ---- */
+html .tape{background:var(--champagne);color:var(--night)}
+html .tape__set i{border-color:var(--night)}
+/* ---- Türen, Werkbank, Karten: Umrisse statt Schatten ---- */
+html .door a{border-radius:var(--r-l);border-width:1.5px;box-shadow:none}
+html .door a:hover{box-shadow:6px 6px 0 -1px var(--brass);transform:translate(-2px,-2px)}
+html .door--0 a{background-color:var(--night);background-image:linear-gradient(var(--grid-dark) 1px,transparent 1px),linear-gradient(90deg,var(--grid-dark) 1px,transparent 1px);background-size:32px 32px}
+html .door--0 a::before{border-color:rgba(216,189,138,.45)}
+html .door--3 a{background:color-mix(in srgb,var(--champagne) 22%,var(--surface))}
+html .door__icon{border-radius:var(--r-m)}
+html .door__icon::after{border-radius:var(--r-l)}
+html .bench2__tab{border-radius:var(--r-m);border-width:1.5px}
+html .bench2__tab.is-active{border-color:var(--fjord);box-shadow:5px 5px 0 -1px var(--brass)}
+html .sv-wrap,html .bench2__panel .sv-wrap{border-radius:var(--r-m);border-width:1.5px}
+html .panel,html .stat,html .app .panel,html .app .stat,html .pflow__card,html .callback,html .app-nav,html .mode,html .category,html .price,html .frame,html .wifi svg,html .slip{border-radius:var(--r-m)!important}
+html .app .panel,html .app .stat,html .pflow__card{box-shadow:none!important;border:1.5px solid var(--line)!important}
+html .price{border-width:1.5px}
+html .price--focus{box-shadow:6px 6px 0 -1px var(--champagne)}
+html .mode{border-radius:var(--r-m)}
+html .mode.is-on{box-shadow:4px 4px 0 -1px var(--brass)}
+html .ai-more,html .more-fields{border-radius:var(--r-m)}
+html .ai-more{background-color:var(--night);background-image:linear-gradient(var(--grid-dark) 1px,transparent 1px),linear-gradient(90deg,var(--grid-dark) 1px,transparent 1px);background-size:32px 32px}
+html .app-nav [aria-current="page"]{background:var(--fjord-soft);color:var(--fjord)}
+html .todo button{border-radius:var(--r-m);border-width:1.5px}
+html .todo button:hover{box-shadow:4px 4px 0 -1px var(--brass)}
+html .app-badge{border-radius:var(--r-s);border-style:solid}
+html .viewmenu__pop{border-radius:var(--r-m)}
+html .viewmenu__row button{border-radius:var(--r-s)}
+html .lost__code{-webkit-text-stroke-color:var(--champagne)}
+html .success-mark{border-radius:var(--r-m)}
+html .callmock__screen{background:linear-gradient(170deg,#0F4B51,#0D3539)}
+/* ---- Abschnittsköpfe: Maßlinie unter der Überschrift ---- */
+html .section-head{position:relative;padding-bottom:28px}
+html .section-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:9px;background:linear-gradient(var(--line),var(--line)) center/100% 1.5px no-repeat,linear-gradient(var(--line),var(--line)) left/1.5px 100% no-repeat,linear-gradient(var(--line),var(--line)) right/1.5px 100% no-repeat}
+html .band--night .section-head::after{background:linear-gradient(#3D6E73,#3D6E73) center/100% 1.5px no-repeat,linear-gradient(#3D6E73,#3D6E73) left/1.5px 100% no-repeat,linear-gradient(#3D6E73,#3D6E73) right/1.5px 100% no-repeat}
+/* ---- Arbeitsbereiche ---- */
+html .app__head::after{background:var(--stitch)}
+html .site-header--app{background:var(--night)}
+/* Blattbeschriftung darf über den Rand ragen */
+html .bench,html .app-mock,html .sv-wrap{overflow:visible}
+html .bench{background:#0A2C30;border-color:#4F7F83}
+html .bench>*:first-child{border-radius:var(--r-m) var(--r-m) 0 0}
+html .bench>*:last-child{border-radius:0 0 var(--r-m) var(--r-m)}
+html .app-mock{border:1.5px solid #4F7F83}
+html .app-mock>*{border-radius:inherit}
+html .sv-wrap .sv{border-radius:var(--r-s)}
+html .pv-send{border-radius:var(--r-s);background:var(--fjord);color:#fff}
+html .frame__bar span{color:var(--ink-2)}

@@ -29,7 +29,7 @@ test('does not pretend to classify unknown or conflicting concerns', () => {
 });
 
 test('every guided path provides verifiable observations and an explicit escalation condition', () => {
-  assert.equal(categories.length, 6);
+  assert.equal(categories.length, 7);
   assert.equal(new Set(categories.map((category) => category.id)).size, categories.length);
   for (const category of categories) {
     assert.equal(getDiagnostic(category.id), category);

@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import {ArrowRight,Phone,Smartphone,Landmark,Video,ShieldAlert,HeartPulse,TrainFront,Image as ImageIcon,Tv,Plus,KeyRound,HandCoins,UserRound,Receipt,Home,Headset,Users} from 'lucide-react';
 import ProcessSteps from '../components/ProcessSteps';
+import CallbackForm from '../components/CallbackForm';
 import {company} from '../../lib/company';
 import {organization,pageMetadata} from '../../lib/seo';
+import Split from '../components/Split';
+import Threads from '../components/Threads';
+import CallMock from '../components/CallMock';
 
 export const metadata=pageMetadata('Digitalhilfe für Senioren im Kreis Plön und in Ostholstein | FUNKNAHT','Smartphone, Online-Banking, Videoanrufe und Schutz vor Betrug: FUNKNAHT erklärt es in Ruhe bei Ihnen zu Hause. Auch Angehörige können einen Termin anfragen.','/senioren');
 
@@ -10,7 +14,7 @@ const topics=[
  {icon:Smartphone,title:'Smartphone und Tablet',text:'Einrichten, Schrift vergrößern, wichtige Kontakte anlegen, Notfall-Informationen auf dem Sperrbildschirm.'},
  {icon:Landmark,title:'Online-Banking sicher nutzen',text:'Banking-App Ihrer Bank einrichten, Überweisung gemeinsam üben, Kontoauszüge abrufen. Sie tippen, wir erklären.'},
  {icon:Video,title:'Mit der Familie in Kontakt',text:'WhatsApp, Videoanrufe mit Kindern und Enkeln, Fotos schicken und Gruppen verstehen.'},
- {icon:ShieldAlert,title:'Betrug erkennen',text:'Falsche Bankanrufe, „Hallo Mama“-Nachrichten, gefälschte Paket-SMS. Und was Sie im Ernstfall tun.'},
+ {icon:ShieldAlert,title:'Betrug erkennen',text:'Falsche Bankanrufe, „Hallo Mama“-Nachrichten, gefälschte Paket-SMS. Verdächtige Nachricht? Schicken Sie uns ein Foto davon, wir sagen Ihnen, ob sie echt ist.'},
  {icon:HeartPulse,title:'Gesundheit online',text:'E-Rezept-App, Arzttermine online buchen, die App Ihrer Krankenkasse einrichten.'},
  {icon:TrainFront,title:'Unterwegs und im Alltag',text:'Fahrplan-Apps und Deutschlandticket, Online-Einkauf, Lieferungen verfolgen.'},
  {icon:ImageIcon,title:'Fotos und E-Mail',text:'E-Mail einrichten, Fotos sichern, ordnen und zum Ausdrucken oder als Fotobuch vorbereiten.'},
@@ -42,13 +46,13 @@ export default function SeniorPage(){
  const schema={'@context':'https://schema.org','@type':'Service',name:'Digitalhilfe für Senioren',serviceType:'Technikhilfe und Schulung zu Hause',provider:organization,areaServed:organization.areaServed,description:metadata.description};
  return <div className="senior">
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
-  <section className="page-head">
+  <section className="page-head glow"><Threads className="threads--soft"/>
    <div className="wrap page-head__grid">
     <div>
      <p className="intro">Digitalhilfe für Senioren</p>
-     <h1 className="display">Technik in Ruhe erklärt. Bei Ihnen zu Hause.</h1>
+     <Split as="h1" className="display">Technik in Ruhe erklärt. Bei Ihnen zu Hause.</Split>
      <p className="lead">Smartphone, Online-Banking, Videoanrufe mit den Enkeln: Wir zeigen es Ihnen geduldig, so oft Sie möchten. Im Kreis Plön und in Ostholstein.</p>
-     <div className="actions">{tel&&<a className="btn btn--light btn--big" href={tel}><Phone size={20}/>{phone}</a>}<Link className={tel?'btn btn--ghost btn--big':'btn btn--light btn--big'} href="/contact?thema=senioren">Hausbesuch anfragen<ArrowRight size={20}/></Link></div>
+     <div className="actions">{tel&&<a className="btn btn--light btn--big" href={tel}><Phone size={20}/>{phone}</a>}<a className={tel?'btn btn--ghost btn--big':'btn btn--light btn--big'} href="#rueckruf">Rückruf anfordern<ArrowRight size={20}/></a></div>
     </div>
     <figure className="slip slip--guide" aria-label="Beispielseite aus einer Hilfe-Mappe">
      <div className="slip__head"><span>Ihre Hilfe-Mappe · Seite 3</span><img src="/funknaht-mark.png" alt="" width="22" height="22"/></div>
@@ -66,28 +70,28 @@ export default function SeniorPage(){
 
   <section className="band">
    <div className="wrap">
-    <div className="section-head"><h2 className="h2 reveal">Dabei helfen wir</h2><p className="lead reveal reveal-delay-1">Sie suchen sich aus, was Ihnen wichtig ist. Wir fangen dort an, wo Sie gerade stehen.</p></div>
+    <div className="section-head"><Split as="h2" className="h2">Dabei helfen wir</Split><p className="lead reveal reveal-delay-1">Sie suchen sich aus, was Ihnen wichtig ist. Wir fangen dort an, wo Sie gerade stehen.</p></div>
     <div className="topic-grid">{topics.map(({icon:Icon,title,text},i)=><article className={'topic reveal reveal-delay-'+((i%3)+1)} key={title}><span className="topic__icon"><Icon size={26} strokeWidth={1.7}/></span><h3>{title}</h3><p>{text}</p></article>)}</div>
    </div>
   </section>
 
   <section className="band band--night">
    <div className="wrap">
-    <div className="section-head"><div><p className="intro">Unser Versprechen</p><h2 className="h2">Vertrauen ist hier das Wichtigste.</h2></div><p className="lead">Gerade beim Thema Geld und Sicherheit sollen Sie sich auf klare Regeln verlassen können.</p></div>
+    <div className="section-head"><div><p className="intro">Unser Versprechen</p><Split as="h2" className="h2">Vertrauen ist hier das Wichtigste.</Split></div><p className="lead">Gerade beim Thema Geld und Sicherheit sollen Sie sich auf klare Regeln verlassen können.</p></div>
     <div className="promise-grid">{promises.map(([Icon,title,text])=><div className="promise" key={title}><Icon size={26} color="var(--champagne)"/><h3>{title}</h3><p>{text}</p></div>)}</div>
    </div>
   </section>
 
   <section className="band band--stone">
    <div className="wrap process">
-    <div><p className="intro">So läuft es ab</p><h2 className="h2">Ohne Eile, ohne Fachchinesisch.</h2><p className="prose" style={{marginTop:20}}>Sie bestimmen das Tempo. Wenn Sie etwas zweimal hören möchten, erklären wir es zweimal.</p></div>
+    <div><p className="intro">So läuft es ab</p><Split as="h2" className="h2">Ohne Eile, ohne Fachchinesisch.</Split><p className="prose" style={{marginTop:20}}>Sie bestimmen das Tempo. Wenn Sie etwas zweimal hören möchten, erklären wir es zweimal.</p></div>
     <ProcessSteps steps={steps}/>
    </div>
   </section>
 
   <section className="band">
    <div className="wrap two-col">
-    <div><p className="intro">Für Angehörige</p><h2 className="h2">Sie wohnen weiter weg und machen sich Sorgen?</h2></div>
+    <div className="family-aside"><p className="intro">Für Angehörige</p><Split as="h2" className="h2">Sie wohnen weiter weg und machen sich Sorgen?</Split><CallMock/></div>
     <div className="prose">
      <p>Oft machen Töchter, Söhne oder Enkel den ersten Schritt. Sie können den Termin für Ihre Eltern anfragen. Wir besprechen alles direkt mit ihnen, vor Ort und in ihrem Tempo.</p>
      <p>Auf Wunsch geben wir Ihnen danach eine kurze Rückmeldung, was eingerichtet wurde, aber nur mit dem Einverständnis Ihrer Eltern.</p>
@@ -103,7 +107,7 @@ export default function SeniorPage(){
 
   <section className="band band--stone">
    <div className="wrap two-col">
-    <div><h2 className="h2">Gut zu wissen: Steuern sparen</h2></div>
+    <div><Split as="h2" className="h2">Gut zu wissen: Steuern sparen</Split></div>
     <div className="prose">
      <p>Arbeitskosten für die Reparatur und Wartung von Geräten <strong>in Ihrem Haushalt</strong>, etwa Computer oder Fernseher, können als Handwerkerleistung steuerlich begünstigt sein: 20 Prozent der Arbeits- und Fahrtkosten, höchstens 1.200 Euro im Jahr (§ 35a EStG). Voraussetzung sind eine Rechnung und die Zahlung per Überweisung.</p>
      <p>Auf unseren Rechnungen weisen wir Arbeitszeit, Anfahrt und Material deshalb getrennt aus. Ob ein Termin im Einzelfall begünstigt ist, etwa eine reine Einweisung, klärt Ihr Steuerberater oder Lohnsteuerhilfeverein.</p>
@@ -113,15 +117,15 @@ export default function SeniorPage(){
 
   <section className="band">
    <div className="wrap faq">
-    <div><h2 className="h2">Häufige Fragen</h2></div>
+    <div><Split as="h2" className="h2">Häufige Fragen</Split></div>
     <div>{faqs.map(([q,a])=><details key={q}><summary>{q}<Plus size={22}/></summary><p>{a}</p></details>)}</div>
    </div>
   </section>
 
-  <section className="band band--night">
-   <div className="wrap closing">
-    <div><h2 className="display">Einfach melden.</h2><p className="lead">Erzählen Sie, womit Sie Hilfe möchten. Wir rufen zurück und vereinbaren einen Termin, der Ihnen passt.</p></div>
-    <div className="actions">{tel&&<a className="btn btn--light btn--big" href={tel}><Phone size={20}/>{phone}</a>}<Link className={tel?'btn btn--ghost btn--big':'btn btn--light btn--big'} href="/contact?thema=senioren">Anfrage schreiben<ArrowRight size={20}/></Link></div>
+  <section className="band band--night" id="rueckruf">
+   <div className="wrap two-col" style={{alignItems:'center'}}>
+    <div><Split as="h2" className="display">Einfach melden.</Split><p className="lead" style={{marginTop:20}}>Sie müssen nichts ausfüllen außer Ihrem Namen und Ihrer Telefonnummer. Wir rufen zurück und vereinbaren einen Termin, der Ihnen passt.</p>{tel&&<p style={{marginTop:24}}><a className="btn btn--light btn--big" href={tel}><Phone size={20}/>Direkt anrufen: {phone}</a></p>}</div>
+    <CallbackForm title="Rückruf anfordern" topic="Smartphone oder Tablet"/>
    </div>
   </section>
  </div>;
