@@ -141,20 +141,20 @@ export function attachmentBytes(row){const file=path.join(uploadDir(),row.ticket
 export function removeTicketFiles(ticketId){fs.rmSync(path.join(uploadDir(),ticketId),{recursive:true,force:true});getDb().prepare('DELETE FROM ticket_attachments WHERE ticket_id=?').run(ticketId)}
 
 // ---------- Time tracking ----------
-export function addTime(ticketId,{minutes,note='',billable=true,date}){
+export function addTime(ticketId,{minutes,note='',billable=true,date,userId=null}){
  ownerRow(ticketId);
  if(!Number.isInteger(minutes)||minutes<1||minutes>1440)throw appError('Bitte geben Sie zwischen 1 und 1.440 Minuten an.');
  if(typeof note!=='string'||note.length>300)throw appError('Die Notiz darf höchstens 300 Zeichen haben.');
  const day=typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)?date:new Date().toISOString().slice(0,10);
  const id=randomUUID();
- getDb().prepare('INSERT INTO ticket_time(id,ticket_id,minutes,note,billable,work_date,created_at) VALUES(?,?,?,?,?,?,?)').run(id,ticketId,minutes,note.trim(),billable?1:0,day,now());
+ getDb().prepare('INSERT INTO ticket_time(id,ticket_id,minutes,note,billable,work_date,created_at,user_id) VALUES(?,?,?,?,?,?,?,?)').run(id,ticketId,minutes,note.trim(),billable?1:0,day,now(),userId);
  return id;
 }
 export function removeTime(id){if(typeof id!=='string'||!/^[0-9a-f-]{36}$/.test(id))throw appError('Eintrag nicht gefunden.',404);if(getDb().prepare('SELECT document_id FROM ticket_time WHERE id=?').get(id)?.document_id)throw appError('Diese Zeit ist bereits in einem Beleg berechnet. Stornieren Sie zuerst den Beleg.',409);if(!getDb().prepare('DELETE FROM ticket_time WHERE id=?').run(id).changes)throw appError('Eintrag nicht gefunden.',404)}
 export function timeFor(ticketId){return getDb().prepare('SELECT tt.id,tt.minutes,tt.note,tt.billable,tt.work_date AS date,CASE WHEN d.status=\'entwurf\' THEN \'Entwurf\' ELSE d.number END AS billedIn FROM ticket_time tt LEFT JOIN documents d ON d.id=tt.document_id WHERE tt.ticket_id=? ORDER BY tt.work_date,tt.created_at').all(ticketId).map(r=>({...r,billable:!!r.billable}))}
-export function timeReport(month){
+export function timeReport(month,{userId=null}={}){
  if(typeof month!=='string'||!/^\d{4}-\d{2}$/.test(month))throw appError('Ungültiger Monat.');
- return getDb().prepare("SELECT tt.work_date AS date,tt.minutes,tt.note,tt.billable,t.id AS ticket,o.name AS organization,o.account_type FROM ticket_time tt JOIN support_tickets t ON t.id=tt.ticket_id JOIN organizations o ON o.id=t.organization_id WHERE substr(tt.work_date,1,7)=? ORDER BY tt.work_date").all(month).map(r=>({...r,billable:!!r.billable,organization:r.account_type==='business'?r.organization:'Privatkunde'}));
+ return getDb().prepare("SELECT tt.work_date AS date,tt.minutes,tt.note,tt.billable,t.id AS ticket,o.name AS organization,o.account_type,COALESCE(u.name,'') AS person FROM ticket_time tt JOIN support_tickets t ON t.id=tt.ticket_id JOIN organizations o ON o.id=t.organization_id LEFT JOIN users u ON u.id=tt.user_id WHERE substr(tt.work_date,1,7)=? AND (? IS NULL OR tt.user_id=?) ORDER BY tt.work_date").all(month,userId,userId).map(r=>({...r,billable:!!r.billable,organization:r.account_type==='business'?r.organization:'Privatkunde'}));
 }
 export function toCsv(rows){
  const esc=v=>{const s=String(v??'');return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};

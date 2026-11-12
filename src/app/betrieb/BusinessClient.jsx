@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
+import AccessGate,{TrialBanner} from '../components/AccessGate';
 import {LayoutDashboard,Users,CalendarDays,ClipboardList,Wrench,Link2,CreditCard,LifeBuoy,Plus,Check,X,RefreshCw,LogOut,Copy,ExternalLink,AlertCircle,ArrowRight,Lock,Settings,UsersRound,Bell,CalendarSync,Trash2} from 'lucide-react';
 
 const sections=[['overview','Überblick',LayoutDashboard],['appointments','Termine',CalendarDays],['clients','Kunden',Users],['orders','Aufträge',ClipboardList],['services','Leistungen',Wrench],['settings','Buchungsseite',Link2],['team','Team',UsersRound],['plans','Tarif & Abrechnung',CreditCard]];
@@ -18,20 +19,21 @@ const Badge=({value})=>{const [tone,label]=status[value]||['muted',value];return
 export default function BusinessClient(){
  const [data,setData]=useState(null),[tab,setTab]=useState('overview'),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editor,setEditor]=useState(null),[unauth,setUnauth]=useState(false),[billing,setBilling]=useState(null),[copied,setCopied]=useState(false);
  const sheet=useRef(null);
- const [team,setTeam]=useState(null),[teamLink,setTeamLink]=useState(''),[cal,setCal]=useState(null);
+ const [lockout,setLockout]=useState(''),[terms,setTerms]=useState(false),[team,setTeam]=useState(null),[teamLink,setTeamLink]=useState(''),[cal,setCal]=useState(null);
  async function loadTeam(){try{const r=await fetch('/api/business/team',{cache:'no-store'});const d=await r.json();if(r.ok)setTeam(d)}catch{}}
  async function teamCall(method,body,ok){setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/business/team',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw Error(d.error||'Das hat nicht geklappt.');setTeam(t=>({...t,...d}));if(d.link)setTeamLink(d.link);if(ok)setNotice(ok)}catch(e){setError(e.message)}finally{setBusy(false)}}
  async function loadCal(renew){try{const r=await fetch('/api/business/calendar',{method:renew?'POST':'GET',cache:'no-store'});const d=await r.json();if(r.ok){setCal(d);if(renew)setNotice('Neuer Kalender-Link erstellt. Der alte funktioniert nicht mehr.')}}catch{}}
- async function load(){const r=await fetch('/api/business',{cache:'no-store'});const d=await r.json();if(!r.ok){if(r.status===401)setUnauth(true);throw Error(d.error||'Der Arbeitsbereich konnte nicht geladen werden.')}setData(d);return d}
+ async function load(){const r=await fetch('/api/business',{cache:'no-store'});const d=await r.json();if(!r.ok){if(r.status===401)setUnauth(true);if(d.code==='ACCESS_BLOCKED'){setLockout(d.error);return null}throw Error(d.error||'Der Arbeitsbereich konnte nicht geladen werden.')}setData(d);return d}
  useEffect(()=>{const q=new URLSearchParams(location.search);if(['abo','plans'].includes(q.get('tab')))setTab('plans');if(q.get('checkout')==='success')setNotice('Danke! Ihr Tarif wird freigeschaltet, sobald die Zahlung bestätigt ist. Das dauert meist nur wenige Sekunden.');if(q.get('checkout')==='cancelled')setNotice('Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet.');
   load().catch(e=>setError(e.message)).finally(()=>setLoading(false));fetch('/api/billing/status',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(setBilling).catch(()=>{})},[]);
  useEffect(()=>{if(editor)sheet.current?.showModal();else sheet.current?.close()},[editor]);
  function change(next){setTab(next);setError('');setNotice('');setEditor(null);if(next==='team')loadTeam();if(next==='settings'&&!cal)loadCal()}
  async function mutate(payload,done='Gespeichert.'){if(busy)return false;setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/business',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw Error(d.error||'Die Änderung wurde nicht gespeichert.');await load();setNotice(done);setEditor(null);return true}catch(e){setError(e.message);return false}finally{setBusy(false)}}
  async function submit(e,type){e.preventDefault();const f=Object.fromEntries(new FormData(e.currentTarget));if(type==='service'){f.durationMinutes=Number(f.durationMinutes);f.priceCents=Math.round(Number(f.priceEuro||0)*100);f.active=f.active==='on';delete f.priceEuro}if(type==='order'){f.amountCents=Math.round(Number(f.amountEuro||0)*100);delete f.amountEuro}if(type==='appointment')f.startsAt=new Date(f.startsAt).toISOString();await mutate({action:type+'.'+(editor?.id?'update':'create'),...(editor?.id?{id:editor.id}:{}),...f})}
- async function billingAction(action,planId){setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/billing/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(planId?{planId}:{})});const d=await r.json();if(!r.ok)throw Error(d.error||'Die Tarifverwaltung ist gerade nicht erreichbar.');if(d.url)location.assign(d.url);else{if(d.current)setBilling(d);await load();setNotice(action==='preview'?'Testtarif aktiv. Es wurde keine Zahlung ausgelöst.':'Tarif aktualisiert.')}}catch(e){setError(e.message)}finally{setBusy(false)}}
+ async function billingAction(action,planId){setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/billing/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(planId?{planId,acceptTerms:action==='checkout'?terms:undefined}:{})});const d=await r.json();if(!r.ok)throw Error(d.error||'Die Tarifverwaltung ist gerade nicht erreichbar.');if(d.url)location.assign(d.url);else{if(d.current)setBilling(d);await load();setNotice(action==='preview'?'Testtarif aktiv. Es wurde keine Zahlung ausgelöst.':'Tarif aktualisiert.')}}catch(e){setError(e.message)}finally{setBusy(false)}}
  async function logout(){await fetch('/api/account/logout',{method:'POST'}).catch(()=>{});location.assign('/konto')}
 
+ if(lockout)return <AccessGate message={lockout} waiting={/geprüft/.test(lockout)}/>;
  if(loading)return <div className="wrap app"><p className="muted" role="status">Ihr Arbeitsbereich wird geladen …</p></div>;
  if(!data)return <div className="wrap app"><div className="empty" style={{maxWidth:580}}><Lock size={28}/><h3>{unauth?'Bitte melden Sie sich an.':'Der Arbeitsbereich ist gerade nicht erreichbar.'}</h3><p>{unauth?'Der Arbeitsbereich gehört zu Ihrem Betriebskonto.':error}</p><Link className="btn" href="/konto?next=/betrieb">Anmelden oder Konto anlegen</Link></div></div>;
 
@@ -50,6 +52,7 @@ export default function BusinessClient(){
    <div><h1 className="app__title">{org.name}</h1><p className="app__sub">{user.name} ({roleLabel[role]}) · Tarif {plan?.name||planId}{org.sandboxEnabled?' (lokaler Test)':''}</p></div>
    <div className="actions"><Link className="mini-btn" href="/portal"><LifeBuoy size={15}/>Technische Hilfe</Link><button className="mini-btn" onClick={()=>{setBusy(true);load().then(()=>setNotice('Aktualisiert.')).catch(e=>setError(e.message)).finally(()=>setBusy(false))}} disabled={busy}><RefreshCw size={15}/>Aktualisieren</button><button className="mini-btn" onClick={logout}><LogOut size={15}/>Abmelden</button></div>
   </div>
+  {!org.hasSubscription&&<TrialBanner access={org.access} onPlans={()=>change('plans')}/>}
   <div className="app__layout">
    <nav className="app-nav" aria-label="Bereiche">{visible.map(([id,label,Icon])=><button key={id} aria-current={tab===id?'page':undefined} onClick={()=>change(id)}><Icon size={17}/>{label}{id==='orders'&&!hasOrders?<span className="lock">Betrieb</span>:counts[id]?<span className="count">{counts[id]}</span>:null}</button>)}<hr/><Link href="/portal/werkstatt"><LifeBuoy size={17}/>Meine Anfragen</Link><Link href="/konto"><Settings size={17}/>Konto und Daten</Link></nav>
    <div className="app-main">
@@ -120,9 +123,10 @@ export default function BusinessClient(){
      {billing&&!billing.configured&&<p className="notice notice--warn" style={{marginBottom:16}}><AlertCircle size={18}/><span>Die Online-Zahlung ist noch nicht eingerichtet. Ein kostenpflichtiger Tarif kann gerade nicht abgeschlossen werden.</span></p>}
      {billing?.configured&&billing.testMode&&<p className="notice" style={{marginBottom:16}}><AlertCircle size={18}/><span>Testbetrieb: Zahlungen werden nur simuliert.</span></p>}
      <div className="plan-grid">{planCards.map(p=><article key={p.id} className={'plan'+(planId===p.id?' is-current':'')}><h3>{p.name}</h3><p className="plan__price">{p.price}</p><p>{p.text}</p>
-      {planId===p.id?<span className="badge badge--info" style={{alignSelf:'flex-start'}}><Check size={12}/>Ihr Tarif</span>:p.id==='free'?null:p.id==='individuell'?<Link className="link" href="/contact?thema=Betriebsportal">Anfragen<ArrowRight size={15}/></Link>:<button className="btn btn--small" disabled={busy||!billing?.plans?.find(x=>x.id===p.id)?.configured} onClick={()=>billingAction('checkout',p.id)}>Tarif wählen</button>}
+      {planId===p.id?<span className="badge badge--info" style={{alignSelf:'flex-start'}}><Check size={12}/>Ihr Tarif</span>:p.id==='free'?null:p.id==='individuell'?<Link className="link" href="/contact?thema=Betriebsportal">Anfragen<ArrowRight size={15}/></Link>:<button className="btn btn--small" disabled={busy||!terms||!billing?.plans?.find(x=>x.id===p.id)?.configured} title={terms?undefined:'Bitte zuerst AGB und AVV bestätigen'} onClick={()=>billingAction('checkout',p.id)}>Tarif wählen</button>}
       {['basic','betrieb'].includes(p.id)&&billing?.previewAvailable&&planId!==p.id&&<button className="link" style={{fontSize:'.85rem'}} disabled={busy} onClick={()=>billingAction('preview',p.id)}>Lokal testen, ohne Zahlung</button>}
      </article>)}</div>
+     <label className="check" style={{marginTop:16}}><input type="checkbox" checked={terms} onChange={e=>setTerms(e.target.checked)}/><span>Ich akzeptiere die <a className="link" href="/agb" target="_blank">AGB</a> und den <a className="link" href="/avv" target="_blank">Vertrag zur Auftragsverarbeitung</a>. Erforderlich für kostenpflichtige Tarife.</span></label>
      <div className="actions" style={{marginTop:18}}>{org.sandboxEnabled&&billing?.previewAvailable&&<button className="link" disabled={busy} onClick={()=>billingAction('preview','free')}>Lokalen Test beenden</button>}<button className="mini-btn" disabled={busy||!billing?.canManage} onClick={()=>billingAction('manage')}><CreditCard size={15}/>Zahlung und Rechnungen verwalten</button></div>
     </section>}
    </div>

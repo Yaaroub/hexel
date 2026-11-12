@@ -1,7 +1,7 @@
 import {assertMutationOrigin,readJson,rateLimit,requesterKey,jsonError} from '../../../lib/business-auth.js';
 import {sendMail,mailConfigured} from '../../../lib/mailer.js';
 export const runtime='nodejs';export const dynamic='force-dynamic';
-const topics=['Netzwerk & WLAN','Website','Webanwendung','KI & Automatisierung','Betriebsportal','Digitalhilfe für Senioren','Noch offen'];
+const topics=['Netzwerk & WLAN','Abo & Betreuung','Website','Webanwendung','KI & Automatisierung','Betriebsportal','Digitalhilfe für Senioren','Noch offen'];
 const fields={name:150,email:254,message:5000,company:150,location:150,topic:60,website:200};
 export async function POST(request){
  try{

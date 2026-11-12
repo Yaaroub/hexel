@@ -2,7 +2,7 @@ import {getDb} from './business-db.js';
 import {appError} from './business-auth.js';
 
 // Einstellungen des Inhabers für Belege. Beträge in Cent.
-export const defaultOwnerSettings={hourlyRateCents:6500,travelFlatCents:2500,smallBusiness:false,vatRate:19,paymentDays:14,offerValidDays:30,iban:'',bank:'',invoiceFooter:'Vielen Dank für Ihren Auftrag.'};
+export const defaultOwnerSettings={hourlyRateCents:8500,travelFlatCents:2900,smallBusiness:false,vatRate:19,paymentDays:14,offerValidDays:30,iban:'',bank:'',invoiceFooter:'Vielen Dank für Ihren Auftrag.'};
 
 export function getOwnerSettings(){
  const rows=getDb().prepare('SELECT key,value FROM owner_settings').all();

@@ -107,7 +107,7 @@ Wichtig sind:
 - `CRON_SECRET`: der eben erzeugte Wert
 - `COMPANY_…`: deine echten Angaben für Impressum und Rechnungen
 - `SMTP_…`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_TO`: damit E-Mails rausgehen
-- `OPENAI_API_KEY`: nur einen **neuen** Schlüssel eintragen. Der alte stand in Git und muss bei OpenAI widerrufen sein.
+- `GROQ_API_KEY`: Schlüssel für FUNKNAHT AI (console.groq.com → API Keys). Für Verarbeitung in der EU stattdessen `AI_PROVIDER=mistral` und `MISTRAL_API_KEY`. Der alte OpenAI-Schlüssel stand in Git und muss bei OpenAI widerrufen sein.
 
 Speichern mit `Strg+O`, `Enter`, schließen mit `Strg+X`.
 
@@ -170,6 +170,13 @@ Für den Link „Termin buchen“ in Anfragen brauchst du ein Betriebskonto für
 2. Im Betriebsbereich Leistungen (z. B. „Einsatz vor Ort, 60 Min.“) und Öffnungszeiten eintragen.
 3. Den Kurznamen der Buchungsseite (steht dort unter „Buchungsseite“) in `.env.local` bei `FUNKNAHT_BOOKING_SLUG` eintragen.
 4. `systemctl restart funknaht`
+
+## 10. FUNKNAHT AI und Team
+
+1. In `.env.local` den KI-Schlüssel eintragen (siehe oben), dann `systemctl restart funknaht`.
+2. Inhaberbereich → **FUNKNAHT AI**: eine der Beispielfragen anklicken. Unter **Team & KI** siehst du danach Anfragen, Antwortzeit und Kosten.
+3. Mitarbeiter einladen: **Team & KI** → „Person einladen“. Den Link persönlich schicken. Die Person legt Namen und Passwort fest und meldet sich danach unter **Konto** an.
+4. Vor echten Kundendaten: Auftragsverarbeitungsvertrag (DPA) mit dem KI-Anbieter abschließen. Bei Groq (USA) mit Standardvertragsklauseln. Die Datenschutzerklärung passt sich dem eingestellten Anbieter automatisch an (`npm run build` nach dem Wechsel).
 
 ## Neue Version einspielen
 

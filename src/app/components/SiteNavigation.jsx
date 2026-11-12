@@ -10,10 +10,12 @@ const links=[
  {href:'/#leistungen',label:'Leistungen',note:'Software, IT und Automatisierung'},
  {href:'/betriebsportal',label:'Für Betriebe',note:'Termine, Kunden und Aufträge online'},
  {href:'/senioren',label:'Für Senioren',note:'Digitalhilfe mit Geduld, zu Hause'},
+ {href:'/preise',label:'Preise',note:'Stundensätze, Abos und Websites'},
  {href:'/projects',label:'Arbeiten',note:'Eigene Anwendungen im Detail'},
 ];
 const more=[
- {href:'/netzwerkhilfe',label:'Netzwerkhilfe',note:'Vor Ort in Plön und Ostholstein'},
+ {href:'/netzwerkhilfe',label:'Netzwerk und Router',note:'Vor Ort in Kiel, Plön und Ostholstein'},
+ {href:'/einsatzgebiet',label:'Einsatzgebiet',note:'Kiel, Plön, Preetz, Eutin und mehr'},
  {href:'/portal',label:'Hilfe-Portal',note:'Anliegen Schritt für Schritt klären'},
 ];
 

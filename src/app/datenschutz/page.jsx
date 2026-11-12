@@ -1,7 +1,10 @@
 import {company} from '../../lib/company';
+import {aiConfig} from '../../lib/ai/engine';
+const LEGAL={groq:'Groq, Inc. (USA)',mistral:'Mistral AI SAS (Frankreich, EU)',openai:'OpenAI Ireland Ltd. (Irland; Verarbeitung auch in den USA möglich)',huggingface:'Hugging Face, Inc. (USA)',mock:'keinen externen Anbieter (Testbetrieb)'};
 export const metadata={title:'Datenschutz | FUNKNAHT',robots:{index:true,follow:true}};
 const Gap=({children})=><span className="gap">{children}</span>;
 export default function Datenschutz(){
+ const ai=aiConfig(),aiLegal=process.env.AI_PROVIDER_LEGAL||LEGAL[ai.provider]||'unseren KI-Dienstleister',aiOutsideEu=/USA|laut Anbieter/.test(ai.region)&&!process.env.AI_PROVIDER_LEGAL?.includes('EU');
  const who=<>{company.brand}, {company.owner||<Gap>Inhaber</Gap>}, {company.street||<Gap>Straße</Gap>}, {company.city||<Gap>PLZ Ort</Gap>}, E-Mail: {company.email||<Gap>E-Mail</Gap>}</>;
  return <>
   <section className="page-head"><div className="wrap"><h1 className="display">Datenschutz</h1><p className="lead">Kurz gesagt: Wir erheben nur, was für Ihr Anliegen nötig ist, setzen keine Analyse- oder Werbe-Cookies ein und geben nichts zu Werbezwecken weiter.</p></div></section>
@@ -38,8 +41,10 @@ export default function Datenschutz(){
    <h2>6. Terminbuchung über Buchungsseiten</h2>
    <p>Buchen Sie einen Termin über die Buchungsseite eines Betriebs, werden Ihre Angaben an diesen Betrieb übermittelt; Verantwortlicher ist der jeweilige Betrieb. Sie erhalten eine automatische Eingangsbestätigung per E-Mail.</p>
 
-   <h2>7. KI-Assistent</h2>
-   <p>Nutzen Sie den KI-Assistenten, übermitteln wir Ihre Frage und den bisherigen Gesprächsverlauf an OpenAI (OpenAI Ireland Ltd.) zur Erzeugung einer Antwort. Das geschieht nur nach Ihrer ausdrücklichen Bestätigung (Art. 6 Abs. 1 lit. a DSGVO). Die Anfragen werden mit der Option ohne Speicherung zu Trainingszwecken gesendet. Bitte geben Sie keine Passwörter oder vertraulichen Daten ein.</p>
+   <h2>7. KI-Assistent (FUNKNAHT AI)</h2>
+   <p>Nutzen Sie den KI-Assistenten im Hilfe-Portal, übermitteln wir Ihre Frage, den bisherigen Gesprächsverlauf und die für die Antwort nötigen Auszüge aus unserer Wissensbasis bzw. Ihren eigenen Anfragen an {aiLegal} zur Erzeugung einer Antwort. Das geschieht nur nach Ihrer ausdrücklichen Bestätigung (Art. 6 Abs. 1 lit. a DSGVO). E-Mail-Adressen und Telefonnummern werden vorher gekürzt. Den Gesprächsinhalt speichern wir nicht; wir protokollieren nur Zeitpunkt, Dauer und Umfang der Anfrage, um Missbrauch zu verhindern und Kosten zu steuern (Art. 6 Abs. 1 lit. f DSGVO, Löschung nach 400 Tagen). Möchten Sie, dass wir eine Anfrage anlegen oder Sie an einen Menschen übergeben, schlägt der Assistent das vor; angelegt wird sie erst, wenn Sie auf den Knopf drücken. Bitte geben Sie keine Passwörter oder vertraulichen Daten ein.</p>
+   {aiOutsideEu&&<p>Der Anbieter verarbeitet Daten in einem Drittland. Grundlage sind die Standardvertragsklauseln der EU-Kommission (Art. 46 Abs. 2 lit. c DSGVO), die Teil des Auftragsverarbeitungsvertrags sind.</p>}
+   <p>Auch unser Team nutzt den Assistenten intern, etwa um Anfragen zusammenzufassen. Dabei gelten dieselben Kürzungen; eine automatisierte Entscheidung über Sie findet nicht statt (Art. 22 DSGVO).</p>
 
    <h2>8. Zahlungen</h2>
    <p>Abonnements werden über Stripe (Stripe Payments Europe Ltd., Irland) abgewickelt. Zahlungsdaten geben Sie direkt bei Stripe ein; wir erhalten nur den Status des Abonnements (Art. 6 Abs. 1 lit. b DSGVO).</p>

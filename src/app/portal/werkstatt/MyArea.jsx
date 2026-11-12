@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {Inbox,HardDrive,Activity,FileText,HeartHandshake,AlertCircle,Copy,Check,Trash2,UserPlus,ShieldCheck,Plus} from 'lucide-react';
 import Workshop from './Workshop';
 import NoticeBanner from '../../components/NoticeBanner';
+import AccessGate,{TrialBanner} from '../../components/AccessGate';
 
 const fmtDay=v=>v?new Date(v+(String(v).length===10?'T12:00:00':'')).toLocaleDateString('de-DE'):'–';
 const fmtTime=v=>v?new Intl.DateTimeFormat('de-DE',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)):'noch nie';
@@ -21,6 +22,8 @@ export default function MyArea(){
  async function invite(e){e.preventDefault();setError('');try{const r=await fetch('/api/family',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label})});const d=await r.json();if(!r.ok)throw Error(d.error);setInviteLink(d.link);setLabel('');load()}catch(err){setError(err.message)}}
  async function unlink(id){if(!confirm('Verbindung wirklich lösen?'))return;try{const r=await fetch('/api/family',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});if(!r.ok)throw Error((await r.json()).error);if(data.scopes.some(s=>s.linkId===id))setForOrg('');load()}catch(err){setError(err.message)}}
  if(!auth)return <div className="wrap app"><div className="empty" style={{maxWidth:560}}><Inbox size={28}/><h3>Bitte melden Sie sich an.</h3><p>Ihr Bereich gehört zu Ihrem Konto.</p><Link className="btn" href="/konto?next=/portal/werkstatt">Anmelden</Link></div></div>;
+ const access=data?.account?.access;
+ if(access?.blocked&&!data?.acting)return <AccessGate message={access.message||access.reason} waiting={access.state==='wartet'}/>;
  const tabs=[['tickets','Anfragen',Inbox],['devices','Geräte',HardDrive,data?.devices?.length],['monitors','Überwachung',Activity,data?.monitors?.length],['documents','Belege',FileText,data?.documents?.length],...(forOrg?[]:[['family','Familie',HeartHandshake]])];
  return <div className="wrap app">
   <div className="app__head"><div><h1 className="app__title">Mein Bereich</h1><p className="app__sub">{data?.acting?'Sie handeln für '+data.acting.name+'.':'Anfragen, Geräte und Belege an einem Ort.'}</p></div>

@@ -31,6 +31,8 @@ test('accounts, session isolation, plan gates and appointment conflicts work tog
  const orgsBefore=db.prepare('SELECT COUNT(*) AS count FROM organizations').get().count;
  await assert.rejects(auth.registerAccount({name:'Duplicate',email:'alpha@example.test',password,accountType:'private'}),error=>error.status===409);
  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM organizations').get().count,orgsBefore,'failed registration rolls back tenant creation');
+ assert.equal(auth.getAccount(req(token)).organization.effectivePlan,'betrieb','new business accounts start with the default trial');
+ db.prepare('UPDATE organizations SET trial_plan=NULL,trial_until=NULL WHERE id IN (?,?)').run(first.organizationId,second.organizationId);
  assert.throws(()=>mutateBusiness(first.organizationId,{action:'client.create',name:'Blocked'}),error=>error.code==='PLAN_REQUIRED');
  db.prepare("UPDATE organizations SET plan='basic' WHERE id=?").run(first.organizationId);
  assert.equal(plan.getEffectivePlan(db.prepare('SELECT * FROM organizations WHERE id=?').get(first.organizationId)),'free','plan string alone does not grant paid access');

@@ -1,3 +1,4 @@
+import {staffInvite} from './staff.js';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {getDb} from './business-db.js';
 import {appError,cleanString} from './business-auth.js';
@@ -21,6 +22,7 @@ export function inviteInfo(token){
  if(family)return {kind:'family',id:family.id,organizationId:family.organization_id,inviter:family.inviter,expired:family.expires_at<Date.now(),accepted:!!family.accepted_at};
  const team=db.prepare('SELECT i.*,o.name AS org_name FROM team_invites i JOIN organizations o ON o.id=i.organization_id WHERE i.token_hash=?').get(hash(token));
  if(team)return {kind:'team',id:team.id,organizationId:team.organization_id,organizationName:team.org_name,email:team.email,role:team.role,expired:team.expires_at<Date.now(),accepted:!!team.accepted_at};
+ const staff=staffInvite(token);if(staff)return staff;
  throw appError('Diese Einladung ist ungültig.',404,'NOT_FOUND');
 }
 

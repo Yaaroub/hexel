@@ -3,12 +3,15 @@ import {ArrowRight,Phone,Smartphone,Landmark,Video,ShieldAlert,HeartPulse,TrainF
 import ProcessSteps from '../components/ProcessSteps';
 import CallbackForm from '../components/CallbackForm';
 import {company} from '../../lib/company';
-import {organization,pageMetadata} from '../../lib/seo';
+import {organization,pageMetadata,faqSchema,breadcrumbSchema} from '../../lib/seo';
+import JsonLd from '../components/JsonLd';
 import Split from '../components/Split';
 import Threads from '../components/Threads';
 import CallMock from '../components/CallMock';
+import Plans from '../components/Plans';
+import {privateRates,privatePlans,euro} from '../../lib/pricing';
 
-export const metadata=pageMetadata('Digitalhilfe für Senioren im Kreis Plön und in Ostholstein | FUNKNAHT','Smartphone, Online-Banking, Videoanrufe und Schutz vor Betrug: FUNKNAHT erklärt es in Ruhe bei Ihnen zu Hause. Auch Angehörige können einen Termin anfragen.','/senioren');
+export const metadata=pageMetadata('Digitalhilfe für Senioren in Kiel, Plön und Ostholstein | FUNKNAHT','Smartphone, Online-Banking, Videoanrufe und Schutz vor Betrug: FUNKNAHT erklärt es in Ruhe bei Ihnen zu Hause. '+privateRates.hour+' € pro Stunde, Abo Digital-Sorglos '+privatePlans[0].price+' € im Monat.','/senioren');
 
 const topics=[
  {icon:Smartphone,title:'Smartphone und Tablet',text:'Einrichten, Schrift vergrößern, wichtige Kontakte anlegen, Notfall-Informationen auf dem Sperrbildschirm.'},
@@ -33,7 +36,8 @@ const steps=[
  ['Nachfragen ist ausdrücklich erwünscht','Wenn später etwas nicht klappt, rufen Sie an. Kleine Fragen klären wir oft schon am Telefon.'],
 ];
 const faqs=[
- ['Was kostet ein Hausbesuch?','Abgerechnet wird nach Zeit und Anfahrt. Wir nennen Ihnen die Kosten vorher am Telefon, damit Sie keine Überraschung erleben. Für wiederkehrende Themen wie die Einrichtung eines neuen Smartphones gibt es auf Wunsch einen Festpreis.'],
+ ['Was kostet ein Hausbesuch?',privateRates.hour+' € pro Stunde plus '+privateRates.travel+' € Anfahrt, abgerechnet im 15-Minuten-Takt. Eine Stunde Hilfe zu Hause kostet also '+(privateRates.hour+privateRates.travel)+' €. Mit dem Abo Digital-Sorglos für '+privatePlans[0].price+' € im Monat sind 30 Minuten Telefonhilfe jeden Monat enthalten.'],
+ ['Reparieren Sie auch Handys oder Fernseher?','Nein. Wir helfen beim Einrichten und Bedienen, nicht bei Reparaturen. Ist ein Display gebrochen oder ein Gerät defekt, nennen wir Ihnen gern einen Reparaturdienst.'],
  ['Muss ich ein neues Gerät kaufen?','Nein. Wir arbeiten mit dem, was Sie haben. Wenn ein neues Gerät sinnvoll ist, beraten wir Sie unabhängig und ohne Verkaufsinteresse.'],
  ['Ist Online-Banking nicht gefährlich?','Mit den richtigen Einstellungen und ein paar einfachen Regeln ist es gut beherrschbar. Wir richten die App Ihrer Bank ein und üben mit Ihnen. Ihre Geheimzahlen geben Sie dabei immer selbst ein.'],
  ['Was, wenn ich etwas wieder vergesse?','Das ist ganz normal. Dafür gibt es die Hilfe-Mappe, und Sie dürfen jederzeit nachfragen. Viele Kunden buchen lieber zwei kurze Termine als einen langen.'],
@@ -43,9 +47,10 @@ const faqs=[
 
 export default function SeniorPage(){
  const phone=company.phone,tel=phone?'tel:'+phone.replace(/[^\d+]/g,''):null;
- const schema={'@context':'https://schema.org','@type':'Service',name:'Digitalhilfe für Senioren',serviceType:'Technikhilfe und Schulung zu Hause',provider:organization,areaServed:organization.areaServed,description:metadata.description};
+ const schema={'@context':'https://schema.org','@type':'Service',name:'Digitalhilfe für Senioren',serviceType:'Technikhilfe und Schulung zu Hause',provider:{'@id':organization['@id']},areaServed:organization.areaServed,description:metadata.description};
  return <div className="senior">
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
+  <JsonLd data={[faqSchema(faqs),breadcrumbSchema([['Start','/'],['Digitalhilfe für Senioren','/senioren']])]}/>
   <section className="page-head glow"><Threads className="threads--soft"/>
    <div className="wrap page-head__grid">
     <div>
@@ -105,11 +110,18 @@ export default function SeniorPage(){
    </div>
   </section>
 
+  <section className="band band--night" id="preise" aria-labelledby="sen-preise">
+   <div className="wrap">
+    <div className="section-head"><h2 id="sen-preise" className="h2">Was es kostet</h2><p className="lead">Einzeln: {euro(privateRates.hour)} pro Stunde plus {euro(privateRates.travel)} Anfahrt. Oder als Abo mit festem Ansprechpartner, monatlich kündbar. Alle Preise sind Endpreise, bezahlt wird per Rechnung.</p></div>
+    <Plans plans={privatePlans} topic="Abo Senioren" dark/>
+   </div>
+  </section>
+
   <section className="band band--stone">
    <div className="wrap two-col">
     <div><Split as="h2" className="h2">Gut zu wissen: Steuern sparen</Split></div>
     <div className="prose">
-     <p>Arbeitskosten für die Reparatur und Wartung von Geräten <strong>in Ihrem Haushalt</strong>, etwa Computer oder Fernseher, können als Handwerkerleistung steuerlich begünstigt sein: 20 Prozent der Arbeits- und Fahrtkosten, höchstens 1.200 Euro im Jahr (§ 35a EStG). Voraussetzung sind eine Rechnung und die Zahlung per Überweisung.</p>
+     <p>Arbeitskosten für die Installation, Einrichtung und Wartung von Geräten und Software <strong>in Ihrem Haushalt</strong>, etwa Router, Computer oder Fernseher, können als Handwerkerleistung steuerlich begünstigt sein: 20 Prozent der Arbeits- und Fahrtkosten, höchstens 1.200 Euro im Jahr (§ 35a EStG). Voraussetzung sind eine Rechnung und die Zahlung per Überweisung.</p>
      <p>Auf unseren Rechnungen weisen wir Arbeitszeit, Anfahrt und Material deshalb getrennt aus. Ob ein Termin im Einzelfall begünstigt ist, etwa eine reine Einweisung, klärt Ihr Steuerberater oder Lohnsteuerhilfeverein.</p>
     </div>
    </div>

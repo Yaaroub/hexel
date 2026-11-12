@@ -6,6 +6,11 @@ import Split from './components/Split';
 import Threads from './components/Threads';
 import Tape from './components/Tape';
 import Workbench from './components/Workbench';
+import Owner from './components/Owner';
+import JsonLd from './components/JsonLd';
+import {faqSchema} from '../lib/seo';
+import {industries,towns} from '../lib/profile';
+import {privateRates,businessRates,projectPrices,privatePlans,businessPlans,euro} from '../lib/pricing';
 
 const paths=[
  {icon:LifeBuoy,title:'Bei mir funktioniert etwas nicht.',text:'Im Hilfe-Portal grenzen Sie das Problem Schritt für Schritt ein. Reicht das nicht, übernehmen wir.',go:'Zum Hilfe-Portal',href:'/portal'},
@@ -16,14 +21,17 @@ const paths=[
 
 const services=[
  {id:'software',icon:Code2,title:'Websites und Webanwendungen',short:'Selbst entwickelt, vom Datenmodell bis zur Oberfläche',text:'Eine Website, die Ihren Betrieb in zwei Sätzen erklärt. Eine Anwendung, die einen Arbeitsablauf abbildet, statt ihn mit Tabellen und Zetteln zu umgehen. Wir entwickeln selbst, vom Datenmodell bis zur Oberfläche, und übergeben Software, die Sie verstehen und weiter betreiben können.',points:['Websites mit klarer Struktur, schnell und auf dem Smartphone gut bedienbar','Webanwendungen für Buchung, Verwaltung, Kundenportale und interne Abläufe','Bestehende Systeme übernehmen, aufräumen und gezielt erweitern'],tags:['Next.js','React','Node.js','Prisma','SQL']},
- {id:'it',icon:Network,title:'IT und Netzwerke vor Ort',short:'WLAN, Router und Geräte in Plön und Ostholstein',text:'Das WLAN reicht nicht bis ins Büro, nach dem Routerwechsel fehlen Geräte, der Drucker ist plötzlich nicht mehr erreichbar. Im Kreis Plön und in Ostholstein kommen wir vorbei, sehen uns die Einrichtung an und erklären, was wir verändern.',points:['WLAN-Abdeckung prüfen und gezielt verbessern','Router, Zugangspunkte und Geräte einrichten','Kleine Firmennetze strukturiert aufbauen und dokumentieren'],tags:['Kreis Plön','Ostholstein'],link:['Mehr zur Netzwerkhilfe','/netzwerkhilfe']},
+ {id:'it',icon:Network,title:'IT und Netzwerke vor Ort',short:'WLAN, Router und Firewalls in Kiel, Plön und Ostholstein',text:'Das WLAN reicht nicht bis ins Büro, nach dem Routerwechsel fehlen Geräte, der Drucker ist plötzlich nicht mehr erreichbar. Wir kommen vorbei, finden die Ursache und erklären, was wir verändern. Wir arbeiten an Netzwerk und Software, Hardware-Reparaturen machen wir nicht.',points:['FRITZ!Box, MikroTik, Speedport, UniFi, LANCOM und alle anderen gängigen Router','WLAN messen und gezielt verbessern, Gäste-WLAN sauber trennen','VPN, Firewall und Netzwerk-Betreuung für Praxen und Betriebe'],tags:['Kiel','Kreis Plön','Ostholstein'],link:['Mehr zur Netzwerkhilfe','/netzwerkhilfe']},
  {id:'ki',icon:Workflow,title:'KI und Automatisierung',short:'Abläufe, die sich selbst erledigen',text:'Daten werden dreimal abgetippt, Anfragen von Hand sortiert, Rechnungen nachgetragen. Wir schauen uns an, welche Schritte sich sinnvoll automatisieren lassen, und wo KI hilft oder nur Kosten verursacht.',points:['Wiederkehrende Abläufe gemeinsam erfassen','Schnittstellen zwischen vorhandenen Programmen bauen','KI dort einsetzen, wo das Ergebnis kontrollierbar bleibt'],tags:['Schnittstellen','Automatisierung','KI-Assistenz']},
 ];
 
 
 const questions=[
  ['Muss ich das Portal nutzen, um Sie zu beauftragen?','Nein. Websites, Software und Netzwerkhilfe können Sie direkt über das Kontaktformular anfragen. Das Portal ist ein zusätzlicher Weg, technische Probleme selbst einzugrenzen oder mit allen Angaben an uns zu übergeben.'],
- ['Was kostet eine Website oder Anwendung?','Das hängt vom Umfang ab: Inhalte, Funktionen, Anbindungen und spätere Pflege. Nach einem ersten Gespräch erhalten Sie ein Angebot mit festem Umfang. Eine Pauschale ohne Kenntnis der Aufgabe wäre geraten.'],
+ ['Was kostet das?','Für Haushalte '+privateRates.hour+' € pro Stunde, für Betriebe '+businessRates.hour+' € netto, jeweils plus Anfahrtspauschale. Websites beginnen bei '+projectPrices[0].from+' €, Abos bei '+privatePlans[0].price+' € im Monat. Alle Preise stehen auf der Preisseite.'],
+ ['Welche Router betreuen Sie?','Alle gängigen: FRITZ!Box, MikroTik, Telekom Speedport, Vodafone Station, o2 HomeBox, LANCOM, Ubiquiti UniFi, TP-Link, Zyxel, DrayTek und weitere, auch Firewalls wie OPNsense.'],
+ ['Reparieren Sie auch Handys, Laptops oder Displays?','Nein. Wir arbeiten an Netzwerken und Software, nicht an Hardware. Für Display- oder Akkutausch empfehlen wir einen Reparaturdienst. Danach richten wir das Gerät gern wieder ein.'],
+ ['Wo sind Sie vor Ort?','In Kiel, im Kreis Plön und in Ostholstein, etwa in Plön, Preetz, Schwentinental, Lütjenburg, Eutin, Neustadt und Oldenburg in Holstein. Websites und Software entwickeln wir deutschlandweit.'],
  ['Wie gehen Sie mit meinen Daten um?','Wir speichern nur, was für Ihr Anliegen nötig ist. Die Kundendaten im Betriebsportal gehören Ihrem Betrieb; wir sehen sie nicht ein. Sie können Ihre Daten jederzeit herunterladen oder Ihr Konto löschen.'],
 ];
 
@@ -31,12 +39,12 @@ export default function Home(){
  return <>
   <section className="hero glow">
    <Threads/>
-   <span className="dims" aria-hidden="true">BLATT 01 · M 1:1 · KREIS PLÖN</span>
+   <span className="dims" aria-hidden="true">BLATT 01 · KIEL · PLÖN · OSTHOLSTEIN</span>
    <div className="wrap">
     <div className="hero__grid">
      <div className="hero-in">
       <Split as="h1" className="display" accent="leichter">Software, die Ihren Arbeitstag leichter macht.</Split>
-      <p className="lead">FUNKNAHT entwickelt Websites und Webanwendungen, richtet Netzwerke ein und bringt Abläufe in Ordnung. Für Betriebe und Haushalte im Kreis Plön, in Ostholstein und überall dort, wo Software gebraucht wird.</p>
+      <p className="lead">FUNKNAHT richtet Netzwerke und Router aller Hersteller ein, entwickelt Websites und Webanwendungen und bringt Abläufe in Ordnung. Vor Ort in Kiel, im Kreis Plön und in Ostholstein, digital deutschlandweit.</p>
       <div className="actions"><Link className="btn btn--light" href="/contact">Projekt anfragen<ArrowRight size={18}/></Link><Link className="btn btn--ghost" href="/portal">Technisches Problem schildern</Link></div>
      </div>
      <Bench/>
@@ -58,6 +66,21 @@ export default function Home(){
     <Workbench services={services.map(({icon,...x})=>x)}/>
    </div>
   </section>
+
+  <section className="band" aria-labelledby="fuer-wen">
+   <div className="wrap">
+    <div className="section-head"><Split id="fuer-wen" className="h2">Für Praxen, Handwerk und Haushalte in Ihrer Nähe.</Split><p className="lead reveal reveal-delay-1">Ein Ansprechpartner für Netzwerk und Software, mit klaren Preisen. Haushalte ab {euro(privateRates.hour)} pro Stunde, Betreuung für Betriebe ab {euro(businessPlans[0].price)} im Monat.</p></div>
+    <div className="near">
+     <div className="branch-links reveal">{industries.map(b=><Link key={b.id} href={'/branchen/'+b.id}><strong>{b.short}</strong><span>{b.solutions[0]}</span><ArrowRight size={16}/></Link>)}</div>
+     <div className="near__side reveal reveal-delay-1">
+      <div className="rate"><h3>Preise auf einen Blick</h3><ul className="near__prices"><li><span>Haushalte und Senioren</span><b>{euro(privateRates.hour)}/Std.</b></li><li><span>Betriebe (netto)</span><b>{euro(businessRates.hour)}/Std.</b></li><li><span>Abo Digital-Sorglos</span><b>{euro(privatePlans[0].price)}/Monat</b></li><li><span>Netzwerk-Betreuung</span><b>ab {euro(businessPlans[0].price)}/Monat</b></li><li><span>Website</span><b>ab {euro(projectPrices[0].from)}</b></li></ul><Link className="link" href="/preise">Alle Preise und Abos<ArrowRight size={16}/></Link></div>
+      <p className="town-links">{towns.map(t=><Link key={t.id} href={'/einsatzgebiet/'+t.id}>{t.name}</Link>)}</p>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <Owner/>
 
   <section className="band band--night" id="betriebe" aria-labelledby="betriebe-titel">
    <div className="wrap">
@@ -110,6 +133,7 @@ export default function Home(){
   </section>
 
   <span id="ablauf" aria-hidden="true"/><span id="haltung" aria-hidden="true"/>
+  <JsonLd data={faqSchema(questions)}/>
   <section className="band band--stone" id="fragen" aria-labelledby="fragen-titel">
    <div className="wrap faq">
     <div><Split id="fragen-titel" className="h2">Häufige Fragen</Split><p className="prose" style={{marginTop:16}}>Ihre Frage ist nicht dabei? <Link className="link" href="/contact">Schreiben Sie uns.</Link></p></div>

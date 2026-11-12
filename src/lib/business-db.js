@@ -69,6 +69,14 @@ function migrate(db){
  add('support_tickets','last_activity_at','TEXT');
  add('users','role',"TEXT NOT NULL DEFAULT 'inhaber'");
  add('organizations','calendar_token','TEXT');
+ // Zugang: Freischaltung, Sperre, Testphase und Nutzungsende (siehe lib/access.js)
+ add('organizations','access_status',"TEXT NOT NULL DEFAULT 'aktiv'");
+ add('organizations','access_reason','TEXT');
+ add('organizations','trial_plan','TEXT');
+ add('organizations','trial_until','INTEGER');
+ add('organizations','access_until','INTEGER');
+ add('organizations','trial_notice_at','INTEGER');
+ add('organizations','approved_at','INTEGER');
  add('appointments','manage_token','TEXT');
  add('appointments','reminder_sent_at','INTEGER');
  add('support_tickets','source',"TEXT NOT NULL DEFAULT 'portal'");
@@ -78,6 +86,16 @@ function migrate(db){
  add('support_tickets','device_id','TEXT');
  add('ticket_time','document_id','TEXT');
  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS appointments_manage ON appointments(manage_token)');
+ // FUNKNAHT AI und Team: Mitarbeiter, Aufgaben, KI-Vorschläge mit Freigabe, KI-Protokoll (nur Metadaten, keine Inhalte).
+ add('organizations','internal','INTEGER NOT NULL DEFAULT 0');
+ add('ticket_time','user_id','TEXT');
+ db.exec(`CREATE TABLE IF NOT EXISTS staff_members(id TEXT PRIMARY KEY,user_id TEXT UNIQUE,email TEXT NOT NULL,name TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('admin','mitarbeiter')),active INTEGER NOT NULL DEFAULT 1,invite_hash TEXT UNIQUE,invite_expires INTEGER,created_at INTEGER NOT NULL,accepted_at INTEGER);
+ CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,title TEXT NOT NULL,notes TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'offen' CHECK(status IN ('offen','erledigt')),assignee_user_id TEXT,created_by TEXT NOT NULL,organization_id TEXT,ticket_id TEXT,due_on TEXT,source TEXT NOT NULL DEFAULT 'manuell',created_at INTEGER NOT NULL,done_at INTEGER,done_by TEXT);
+ CREATE INDEX IF NOT EXISTS tasks_assignee ON tasks(assignee_user_id,status);
+ CREATE TABLE IF NOT EXISTS ai_actions(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,organization_id TEXT,surface TEXT NOT NULL,kind TEXT NOT NULL,input TEXT NOT NULL,summary TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'offen',result TEXT,created_at INTEGER NOT NULL,decided_at INTEGER);
+ CREATE INDEX IF NOT EXISTS ai_actions_user ON ai_actions(user_id,status);
+ CREATE TABLE IF NOT EXISTS ai_log(id TEXT PRIMARY KEY,surface TEXT NOT NULL,user_id TEXT,organization_id TEXT,role TEXT,provider TEXT,model TEXT,input_tokens INTEGER NOT NULL DEFAULT 0,output_tokens INTEGER NOT NULL DEFAULT 0,ms INTEGER NOT NULL DEFAULT 0,steps INTEGER NOT NULL DEFAULT 0,tools TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL,error_code TEXT,escalated INTEGER NOT NULL DEFAULT 0,created_at INTEGER NOT NULL);
+ CREATE INDEX IF NOT EXISTS ai_log_time ON ai_log(created_at);`);
  // Version 3: single replies become the first owner message of a conversation.
  if((db.prepare('PRAGMA user_version').get()?.user_version||0)<3){
   for(const row of db.prepare("SELECT id,reply,replied_at,updated_at FROM support_tickets WHERE reply IS NOT NULL AND reply<>''").all()){
@@ -87,6 +105,8 @@ function migrate(db){
  }
  db.exec('PRAGMA user_version=4');
 }
+// Gesperrte, abgelaufene oder wartende Konten nehmen keine Online-Buchungen an.
+function bookingClosed(org){const st=org.access_status||'aktiv';return st!=='aktiv'||(org.access_until&&org.access_until<=Date.now())}
 export function closeDb(){connection?.close();connection=undefined}
 export function transaction(fn){const db=getDb();db.exec('BEGIN IMMEDIATE');try{const result=fn(db);db.exec('COMMIT');return result}catch(error){db.exec('ROLLBACK');throw error}}
 export function newId(){return randomUUID()}
@@ -108,6 +128,7 @@ export function orderView(row){return {id:row.id,clientId:row.client_id,title:ro
 export function appointmentCount(orgId,month){const [start,end]=monthWindow(month);return getDb().prepare('SELECT COUNT(*) AS count FROM appointments WHERE organization_id=? AND starts_at>=? AND starts_at<?').get(orgId,start,end).count}
 export function getAvailability({slug,date,serviceId}){
  const db=getDb(),org=db.prepare('SELECT * FROM organizations WHERE slug=?').get(slug);
+ if(org&&bookingClosed(org))fail('Diese Buchungsseite ist gerade nicht verfügbar.',404,'NOT_FOUND');
  if(!org)fail('Diese Buchungsseite wurde nicht gefunden.',404,'NOT_FOUND');
  assertFeature(org,'booking');const settings=getSettings(org);if(!settings.bookingEnabled)fail('Für diesen Betrieb ist die Online-Buchung derzeit nicht geöffnet.',403,'BOOKING_DISABLED');
  if(!validDate(date))fail('Bitte wählen Sie ein gültiges Datum.');const today=localParts(Date.now()).date;if(date<today||Date.parse(date)-Date.parse(today)>366*86400000)fail('Buchungen sind innerhalb der nächsten 366 Tage möglich.');
@@ -138,7 +159,7 @@ export function createAppointment(orgId,data,{publicBooking=false}={}){
   return {ok:true,id,appointment:{id,startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),status:'pending'}};
  });
 }
-export function publicBook(data){const org=getDb().prepare('SELECT id FROM organizations WHERE slug=?').get(text(data.slug,{required:true,max:80}));if(!org)fail('Buchungsseite nicht gefunden.',404,'NOT_FOUND');return createAppointment(org.id,data,{publicBooking:true})}
+export function publicBook(data){const org=getDb().prepare('SELECT * FROM organizations WHERE slug=?').get(text(data.slug,{required:true,max:80}));if(!org||bookingClosed(org))fail('Buchungsseite nicht gefunden.',404,'NOT_FOUND');return createAppointment(org.id,data,{publicBooking:true})}
 export function mutateBusiness(orgId,data){
  if(data.action==='appointment.create')return createAppointment(orgId,data);
  return transaction(db=>{

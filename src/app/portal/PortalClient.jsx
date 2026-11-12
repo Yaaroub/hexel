@@ -164,7 +164,7 @@ export default function PortalClient(){
    </div>
    <div className="pflow__more">
     <CallbackForm compact collapsible level={2} title="Lieber telefonieren?" intro="Nummer da lassen, wir rufen zurück."/>
-    <details className="ai-more"><summary><span className="ai-more__icon">✦</span><span><strong>KI-Assistent fragen</strong><small>Erklärt Begriffe und schlägt nächste Schritte vor.</small></span></summary>
+    <details className="ai-more"><summary><span className="ai-more__icon">✦</span><span><strong>FUNKNAHT AI fragen</strong><small>Problem gemeinsam eingrenzen, freie Termine finden oder direkt an uns übergeben.</small></span></summary>
      <AiAssistant account={account} onSignIn={signIn} onHandoff={aiHandoff} category={categoryId}/>
     </details>
    </div>

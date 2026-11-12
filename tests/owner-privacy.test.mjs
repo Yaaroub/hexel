@@ -19,7 +19,7 @@ async function account(email,type='private'){const {userId}=await auth.registerA
 
 test('only configured owner emails can enter, and only after password confirmation',async()=>{
  const boss=await account('chef@example.test'),other=await account('kunde@example.test');
- assert.throws(()=>owner.requireOwner(req(other.token)),/Inhaber vorbehalten/);
+ assert.throws(()=>owner.requireOwner(req(other.token)),/FUNKNAHT-Team vorbehalten/);
  assert.throws(()=>owner.requireOwner(req(boss.token)),/bestätigen Sie Ihr Passwort/);
  await assert.rejects(owner.elevate(req(boss.token),'falsch'),/Passwort stimmt nicht/);
  await owner.elevate(req(boss.token),'passwort-mit-laenge');

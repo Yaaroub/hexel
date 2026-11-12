@@ -11,7 +11,7 @@ export default function AccountClient(){
  const del=useRef(null),[delError,setDelError]=useState('');
  useEffect(()=>{const q=new URLSearchParams(location.search);if(okNext(q.get('next')))setNext(q.get('next'));if(q.get('typ')==='betrieb'){setTab('register');setType('business')}
   fetch('/api/account/me',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>setSession(d?.account||null)).catch(()=>{}).finally(()=>setChecking(false))},[]);
- const home=a=>next||(a?.isOwner?'/inhaber':a?.organization?.accountType==='business'?'/betrieb':'/portal/werkstatt');
+ const home=a=>next||(a?.isOwner||a?.staff?'/inhaber':a?.organization?.accountType==='business'?'/betrieb':'/portal/werkstatt');
  async function submit(e){
   e.preventDefault();if(busy)return;setBusy(true);setError('');const f=Object.fromEntries(new FormData(e.currentTarget));
   try{const r=await fetch('/api/account/'+(tab==='login'?'login':'register'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(tab==='login'?{email:f.email,password:f.password}:{name:f.name,email:f.email,password:f.password,businessName:type==='business'?f.businessName:'',accountType:type})});const d=await r.json();if(!r.ok)throw Error(d.error||'Das hat nicht geklappt. Bitte versuchen Sie es erneut.');location.assign(home(d.account))}
@@ -37,7 +37,7 @@ export default function AccountClient(){
   <div className="auth__panel"><div className="auth__box">
    {checking?<p role="status" className="muted">Einen Moment …</p>:session?<>
     <div><p className="muted">Angemeldet als</p><h2>{session.user.name}</h2><p className="muted" style={{marginTop:4}}>{session.user.email}{session.organization?.accountType==='business'?' · '+session.organization.name:''}</p></div>
-    <div className="actions"><a className="btn" href={home(session)}>{session.isOwner&&!next?'Zum Inhaberbereich':'Weiter'}<ArrowRight size={17}/></a><button className="link" onClick={logout} disabled={busy}><LogOut size={16}/>Abmelden</button></div>
+    <div className="actions"><a className="btn" href={home(session)}>{(session.isOwner||session.staff)&&!next?'Zum Inhaberbereich':'Weiter'}<ArrowRight size={17}/></a><button className="link" onClick={logout} disabled={busy}><LogOut size={16}/>Abmelden</button></div>
     <div className="panel" style={{display:'grid',gap:14}}>
      <div className="panel__head" style={{margin:0}}><div><h3>Ihre Daten</h3><p>Nach DSGVO können Sie Ihre Daten jederzeit abrufen oder löschen.</p></div></div>
      <a className="mini-btn" href="/api/account/export" download><Download size={15}/>Alle Daten herunterladen (JSON)</a>

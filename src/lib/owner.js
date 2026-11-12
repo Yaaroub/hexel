@@ -3,6 +3,7 @@ import {getDb} from './business-db.js';
 import {appError,getAccount,sessionId,verifyPassword} from './business-auth.js';
 import {getPlan,getEffectivePlan} from './business-plans.js';
 import {thread,timeFor,ownerRow,removeTicketFiles} from './tickets.js';
+import {accessOf,accessCounts} from './access.js';
 
 // Owner area: the operator of FUNKNAHT sees what is needed to run the service,
 // not the business data of the accounts (clients, appointments, orders stay private).
@@ -12,7 +13,7 @@ export const RETENTION={resolvedTicketsDays:180,auditDays:365};
 export function ownerAccount(request){
  const account=getAccount(request);
  if(!account)throw appError('Bitte melden Sie sich an.',401,'AUTH_REQUIRED');
- if(!account.isOwner)throw appError('Dieser Bereich ist dem Inhaber vorbehalten.',403,'OWNER_ONLY');
+ if(!account.staff)throw appError('Dieser Bereich ist dem FUNKNAHT-Team vorbehalten.',403,'OWNER_ONLY');
  return account;
 }
 
@@ -21,11 +22,19 @@ export function elevationUntil(request){
  return getDb().prepare('SELECT elevated_until FROM sessions WHERE id=?').get(id)?.elevated_until||0;
 }
 
-export function requireOwner(request){
+// Team (Admin und Mitarbeiter): Anfragen, Rückrufe, Aufgaben, Zeiten, KI-Assistent.
+export function requireStaff(request){
  const account=ownerAccount(request);
- if(elevationUntil(request)<=Date.now())throw appError('Bitte bestätigen Sie Ihr Passwort, um den Inhaberbereich zu öffnen.',403,'ELEVATION_REQUIRED');
+ if(elevationUntil(request)<=Date.now())throw appError('Bitte bestätigen Sie Ihr Passwort, um den Bereich zu öffnen.',403,'ELEVATION_REQUIRED');
  return account;
 }
+// Nur Admins (Inhaber und als Admin eingetragene Mitarbeiter): Kundenakten, Zugang, Belege, Einstellungen, Team, Protokoll.
+export function requireOwner(request){
+ const account=requireStaff(request);
+ if(account.staff.role!=='admin')throw appError('Dafür brauchst du Admin-Rechte.',403,'ADMIN_ONLY');
+ return account;
+}
+export const isAdmin=account=>account?.staff?.role==='admin';
 
 export async function elevate(request,password){
  const account=ownerAccount(request);
@@ -68,7 +77,7 @@ export function maskEmail(email){
 
 export function overview(){
  const db=getDb(),month=new Date().toISOString().slice(0,7);
- const orgs=db.prepare('SELECT * FROM organizations').all();
+ const orgs=db.prepare('SELECT * FROM organizations WHERE internal=0').all();
  const plans={free:0,basic:0,betrieb:0,individuell:0};
  let paying=0,monthlyRevenue=0;
  for(const org of orgs){
@@ -92,6 +101,7 @@ export function overview(){
   unpaidInvoices:db.prepare("SELECT COUNT(*) AS n FROM documents WHERE type='rechnung' AND status='versendet'").get().n,
   overdueInvoices:db.prepare("SELECT COUNT(*) AS n FROM documents WHERE type='rechnung' AND status='versendet' AND due_on<?").get(new Date().toISOString().slice(0,10)).n,
   bookingsLast30Days:db.prepare('SELECT COUNT(*) AS count FROM appointments WHERE created_at>=?').get(since).count,
+  access:accessCounts(),
  };
 }
 
@@ -99,7 +109,7 @@ export function listAccounts(){
  const db=getDb();
  const counts=table=>Object.fromEntries(db.prepare(`SELECT organization_id AS id,COUNT(*) AS count FROM ${table} GROUP BY organization_id`).all().map(row=>[row.id,row.count]));
  const clients=counts('clients'),appointments=counts('appointments'),orders=counts('orders');
- return db.prepare('SELECT o.*,u.email,u.last_login_at FROM organizations o LEFT JOIN users u ON u.organization_id=o.id ORDER BY o.created_at DESC').all().map(org=>({
+ return db.prepare('SELECT o.*,u.email,(SELECT MAX(last_login_at) FROM users WHERE organization_id=o.id) AS last_login_at FROM organizations o LEFT JOIN users u ON u.id=(SELECT id FROM users WHERE organization_id=o.id ORDER BY created_at LIMIT 1) WHERE o.internal=0 ORDER BY o.created_at DESC').all().map(org=>({
   id:org.id,
   // Private persons are shown pseudonymously; a business name is business information.
   name:org.account_type==='business'?org.name:'Privatkonto '+org.id.slice(0,6),
@@ -110,6 +120,7 @@ export function listAccounts(){
   createdAt:org.created_at,
   lastLoginDay:org.last_login_at?new Date(org.last_login_at).toISOString().slice(0,10):null,
   usage:{clients:clients[org.id]||0,appointments:appointments[org.id]||0,orders:orders[org.id]||0},
+  access:accessOf(org),
  }));
 }
 

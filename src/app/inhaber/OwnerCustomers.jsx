@@ -1,6 +1,8 @@
 'use client';
 import {useEffect,useState} from 'react';
+import OwnerAccess,{AccessBadge} from './OwnerAccess';
 import {Building2,ArrowLeft,HardDrive,Activity,FileText,Inbox,Plus,Trash2,Printer,Pencil,Copy,Check,AlertCircle,Eye} from 'lucide-react';
+const match=(a,f)=>f==='alle'||(f==='test'?a.access?.trialActive:f==='gesperrt'?['gesperrt','abgelaufen'].includes(a.access?.state):a.access?.state===f);
 const planName={free:'Kostenlos',basic:'Basis',betrieb:'Betrieb',individuell:'Individuell'};
 const day=v=>v?new Intl.DateTimeFormat('de-DE',{dateStyle:'medium'}).format(new Date(typeof v==='string'&&v.length===10?v+'T12:00:00':v)):'–';
 const euro=c=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format((c||0)/100);
@@ -9,7 +11,7 @@ const emptyDevice={kind:'router',label:'',vendor:'',model:'',location:'',serial:
 
 // Konten und Kundenakte. Betriebsdaten der Kunden (deren Kunden, Termine, Aufträge) bleiben verborgen.
 export default function OwnerCustomers({api,handle,onTicket,onNewDocument,initialOrg=null}){
- const [accounts,setAccounts]=useState(null),[org,setOrg]=useState(null),[file,setFile]=useState(null),[device,setDevice]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[copied,setCopied]=useState('');
+ const [filter,setFilter]=useState('alle'),[accounts,setAccounts]=useState(null),[org,setOrg]=useState(null),[file,setFile]=useState(null),[device,setDevice]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[copied,setCopied]=useState('');
  useEffect(()=>{api('/api/owner/accounts').then(d=>setAccounts(d.accounts)).catch(handle)},[api,handle]);
  useEffect(()=>{if(initialOrg)openFile(initialOrg)},[initialOrg]);// eslint-disable-line react-hooks/exhaustive-deps
  async function openFile(id){setOrg(id);setFile(null);setDevice(null);setError('');try{setFile(await api('/api/owner/customer?org='+id))}catch(e){handle(e)}}
@@ -26,6 +28,8 @@ export default function OwnerCustomers({api,handle,onTicket,onNewDocument,initia
    <div className="panel__head" style={{margin:0}}><div><h2>{file.customer.name}</h2><p>{file.customer.accountType==='business'?'Betrieb':'Privatkunde'}{file.customer.contact?' · '+file.customer.contact.name+' · '+file.customer.contact.email:''}</p></div><div className="actions"><button className="mini-btn" onClick={()=>onNewDocument(org,'angebot')}><Plus size={14}/>Angebot</button><button className="mini-btn" onClick={()=>onNewDocument(org,'rechnung')}><Plus size={14}/>Rechnung</button></div></div>
    <div className="privacy-note"><Eye size={18}/><span>Das Öffnen der Kundenakte wurde protokolliert. Kunden, Termine und Aufträge des Betriebs sind hier bewusst nicht sichtbar.</span></div>
    {error&&<p className="notice notice--error" role="alert"><AlertCircle size={18}/>{error}</p>}
+
+   <OwnerAccess orgId={org} access={file.access} plans={file.plans} paidPlan={file.customer.paidPlan} api={api} handle={handle} onChange={access=>{setFile(f=>({...f,access}));setAccounts(l=>l?.map(a=>a.id===org?{...a,access}:a))}}/>
 
    <section className="akte"><div className="akte__head"><h3><HardDrive size={17}/>Geräte ({file.devices.length})</h3><div className="actions">{file.devices.length>0&&<a className="mini-btn" href={'/inhaber/etiketten/'+org} target="_blank" rel="noreferrer"><Printer size={14}/>QR-Aufkleber drucken</a>}<button className="mini-btn" onClick={()=>setDevice({...emptyDevice})}><Plus size={14}/>Gerät</button></div></div>
     {device&&<form className="form panel panel--quiet" onSubmit={saveDevice} key={device.id||'new'}><fieldset disabled={busy}>
@@ -58,6 +62,8 @@ export default function OwnerCustomers({api,handle,onTicket,onNewDocument,initia
  </article>;
 
  return <section className="panel"><div className="panel__head"><div><h2>Konten und Kundenakten</h2><p>Kundenlisten, Termine und Aufträge der Betriebe sind nicht einsehbar, nur ihre Anzahl. Private Konten erscheinen bis zum Öffnen der Akte pseudonymisiert.</p></div></div>
-  {!accounts?<p className="muted">Wird geladen …</p>:accounts.length===0?<div className="empty"><Building2 size={24}/><h3>Noch keine Konten.</h3></div>:<div className="table-wrap"><table className="table"><thead><tr><th>Konto</th><th>E-Mail</th><th>Tarif</th><th className="num">Kunden</th><th className="num">Termine</th><th>Zuletzt aktiv</th><th></th></tr></thead><tbody>{accounts.map(a=><tr key={a.id}><td><strong>{a.name}</strong><br/><span className="hint">{a.accountType==='business'?'Betrieb':'Privat'}</span></td><td>{a.email}</td><td>{planName[a.plan]}</td><td className="num">{a.usage.clients}</td><td className="num">{a.usage.appointments}</td><td>{day(a.lastLoginDay)}</td><td><button className="mini-btn" onClick={()=>openFile(a.id)}>Akte öffnen</button></td></tr>)}</tbody></table></div>}
+  {!accounts?<p className="muted">Wird geladen …</p>:accounts.length===0?<div className="empty"><Building2 size={24}/><h3>Noch keine Konten.</h3></div>:<>
+  <div className="segmented" role="group" aria-label="Filter" style={{marginBottom:14}}>{[['alle','Alle'],['wartet','Warten auf Freischaltung'],['test','In Testphase'],['gesperrt','Gesperrt']].map(([v,l])=><button key={v} aria-pressed={filter===v} onClick={()=>setFilter(v)}>{l}{v!=='alle'?' ('+accounts.filter(a=>match(a,v)).length+')':''}</button>)}</div>
+  <div className="table-wrap"><table className="table"><thead><tr><th>Konto</th><th>E-Mail</th><th>Zugang</th><th>Tarif</th><th className="num">Kunden</th><th className="num">Termine</th><th>Zuletzt aktiv</th><th></th></tr></thead><tbody>{accounts.filter(a=>match(a,filter)).map(a=><tr key={a.id}><td><strong>{a.name}</strong><br/><span className="hint">{a.accountType==='business'?'Betrieb':'Privat'}</span></td><td>{a.email}</td><td><AccessBadge access={a.access}/></td><td>{planName[a.plan]}</td><td className="num">{a.usage.clients}</td><td className="num">{a.usage.appointments}</td><td>{day(a.lastLoginDay)}</td><td><button className="mini-btn" onClick={()=>openFile(a.id)}>Akte öffnen</button></td></tr>)}</tbody></table></div></>}
  </section>;
 }

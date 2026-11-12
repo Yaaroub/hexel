@@ -3,7 +3,8 @@ import {ArrowRight,Check,Plus,CalendarDays,Users,ClipboardList,Link2} from 'luci
 import AppMock from '../components/AppMock';
 import Split from '../components/Split';
 import Threads from '../components/Threads';
-import {pageMetadata} from '../../lib/seo';
+import {pageMetadata,faqSchema,breadcrumbSchema} from '../../lib/seo';
+import JsonLd from '../components/JsonLd';
 export const metadata=pageMetadata('Betriebsportal: Termine, Kunden und Aufträge online | FUNKNAHT','Online-Terminbuchung, Kundenkartei und Auftragsverwaltung für Handwerk, Praxen und Dienstleister. Konto kostenlos, Tarife monatlich kündbar.','/betriebsportal');
 const questions=[
  ['Brauche ich technische Kenntnisse?','Nein. Sie tragen Leistungen und Öffnungszeiten ein und teilen den Link Ihrer Buchungsseite. Beim Einrichten helfen wir gern.'],
@@ -13,6 +14,7 @@ const questions=[
 ];
 export default function Betriebsportal(){
  return <>
+  <JsonLd data={[faqSchema(questions),breadcrumbSchema([['Start','/'],['Betriebsportal','/betriebsportal']])]}/>
   <section className="page-head glow"><Threads className="threads--soft"/>
    <div className="wrap product">
     <div>
