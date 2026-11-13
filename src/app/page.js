@@ -104,7 +104,7 @@ export default function Home(){
 
   <section className="band" id="arbeiten" aria-labelledby="arbeiten-titel">
    <div className="wrap">
-    <div className="section-head"><div><Split id="arbeiten-titel" className="h2">Software zeigt man am besten.</Split></div><p className="lead reveal reveal-delay-1">Eine eigene Software und ein Kundenprojekt, beide vollständig selbst entwickelt. Unterschiedliche Aufgaben, jeweils mit eigener Oberfläche für die Menschen, die damit arbeiten.</p></div>
+    <div className="section-head"><div><Split id="arbeiten-titel" className="h2">Software zeigt man am besten.</Split></div><p className="lead reveal reveal-delay-1">Zwei Anwendungen, vollständig selbst entwickelt. Unterschiedliche Aufgaben, jeweils mit eigener Oberfläche für die Menschen, die damit arbeiten.</p></div>
     <article className="work">
      <div className="work__visual reveal">
       <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Nahtbord – Aufträge</span></div><img src="/images/nahtbord/auftraege.webp" width="1336" height="750" alt="Auftrags-Pipeline in Nahtbord mit Spalten von Anfrage bis Erledigt (Demo-Daten)" loading="lazy"/></div>
@@ -119,14 +119,14 @@ export default function Home(){
     </article>
     <article className="work work--flip">
      <div className="work__visual reveal">
-      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Urlaub-GOSCH – Unterkünfte</span></div><img src="/images/urlaub-gosch/unterkuenfte.webp" width="800" height="448" alt="Unterkunftsliste von Urlaub-GOSCH mit Schnellfiltern und Ostsee-Wetter" loading="lazy"/></div>
-      <div className="frame frame--back" data-parallax="0.07"><div className="frame__bar"><i/><i/><i/></div><img src="/images/urlaub-gosch/start.webp" width="800" height="448" alt="" loading="lazy"/></div>
+      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Rental – Belegungsplan</span></div><img src="/images/rental/muster-belegung.webp" width="1336" height="750" alt="Belegungsplan für Vermieter mit Buchungen über mehrere Ferienhäuser (Musterdaten)" loading="lazy"/></div>
+      <div className="frame frame--back" data-parallax="0.07"><div className="frame__bar"><i/><i/><i/></div><img src="/images/rental/muster-liste.webp" width="1336" height="750" alt="" loading="lazy"/></div>
      </div>
      <div className="reveal reveal-delay-1">
-      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Urlaub-GOSCH</h3>
-      <p className="prose">Ferienvermietung an der Ostsee. Gäste suchen nach Zeitraum, Ort und Ausstattung und sehen die Belegung direkt. Der Vermieter pflegt Objekte, Preise und Verfügbarkeiten, mit Kalenderabgleich per iCal.</p>
-      <div className="work__meta"><span className="tag">Kundenprojekt</span><span className="tag">Verfügbarkeiten</span><span className="tag">Verwaltungsbereich</span></div>
-      <Link className="link" href="/projects#urlaub-gosch">Ansichten und Live-Seite<ArrowRight size={16}/></Link>
+      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Rental</h3>
+      <p className="prose">Vermietungstool für Ferienhäuser und Ferienwohnungen. Gäste sehen freie Tage und den Gesamtpreis sofort und fragen direkt an. Vermieter führen Belegung, Preise und Anfragen an einem Ort, mit Kalender-Abgleich zu Buchungsportalen.</p>
+      <div className="work__meta"><span className="tag">Ferienvermietung</span><span className="tag">Belegungsplan</span><span className="tag">iCal-Abgleich</span></div>
+      <Link className="link" href="/projects#rental">Alle Ansichten<ArrowRight size={16}/></Link>
      </div>
     </article>
    </div>
