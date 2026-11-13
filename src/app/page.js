@@ -104,29 +104,29 @@ export default function Home(){
 
   <section className="band" id="arbeiten" aria-labelledby="arbeiten-titel">
    <div className="wrap">
-    <div className="section-head"><div><Split id="arbeiten-titel" className="h2">Software zeigt man am besten.</Split></div><p className="lead reveal reveal-delay-1">Zwei Anwendungen, vollständig selbst entwickelt. Unterschiedliche Aufgaben, jeweils mit eigener Oberfläche für die Menschen, die damit arbeiten.</p></div>
+    <div className="section-head"><div><Split id="arbeiten-titel" className="h2">Software zeigt man am besten.</Split></div><p className="lead reveal reveal-delay-1">Eine eigene Software und ein Kundenprojekt, beide vollständig selbst entwickelt. Unterschiedliche Aufgaben, jeweils mit eigener Oberfläche für die Menschen, die damit arbeiten.</p></div>
     <article className="work">
      <div className="work__visual reveal">
-      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Pro Manager – Aufgaben</span></div><img src="/images/pro-manager/tasks.png" width="1336" height="649" alt="Aufgabenboard von Pro Manager mit Spalten für Bearbeitungsstände" loading="lazy"/></div>
-      <div className="frame frame--back" data-parallax="0.07"><div className="frame__bar"><i/><i/><i/></div><img src="/images/pro-manager/dashboard.png" width="1336" height="649" alt="" loading="lazy"/></div>
+      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Nahtbord – Aufträge</span></div><img src="/images/nahtbord/auftraege.webp" width="1336" height="750" alt="Auftrags-Pipeline in Nahtbord mit Spalten von Anfrage bis Erledigt (Demo-Daten)" loading="lazy"/></div>
+      <div className="frame frame--back" data-parallax="0.07"><div className="frame__bar"><i/><i/><i/></div><img src="/images/nahtbord/rechnung-druck.webp" width="1336" height="750" alt="" loading="lazy"/></div>
      </div>
      <div className="reveal reveal-delay-1">
-      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Pro Manager</h3>
-      <p className="prose">Aufgaben, Termine, Produktbestände und Notizen in einer Anwendung. Das Board zeigt Zuständigkeiten, Prioritäten und Fälligkeiten; Sprints und Grenzen für laufende Arbeit bilden auch größere Vorhaben ab.</p>
-      <div className="work__meta"><span className="tag">Organisation</span><span className="tag">Kanban und Sprints</span><span className="tag">Bestandsführung</span></div>
-      <Link className="link" href="/projects#pro-manager">Alle Ansichten<ArrowRight size={16}/></Link>
+      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Nahtbord</h3>
+      <p className="prose">Unsere eigene Software für kleine Unternehmen und Online-Shops: Aufträge, Rechnungen mit eigenem Logo, Lager und Aufgaben an einem Ort. Rechnungen sind GoBD-konform und als E-Rechnung exportierbar.</p>
+      <div className="work__meta"><span className="tag">Eigene Software</span><span className="tag">Rechnungen und E-Rechnung</span><span className="tag">Lager</span></div>
+      <Link className="link" href="/projects#nahtbord">Alle Ansichten<ArrowRight size={16}/></Link>
      </div>
     </article>
     <article className="work work--flip">
      <div className="work__visual reveal">
-      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Rental – Unterkunftssuche</span></div><img src="/images/rental/finder.png" width="1336" height="750" alt="Suchoberfläche von Rental mit Filtern für Zeitraum, Ort und Ausstattung" loading="lazy"/></div>
-      <div className="frame frame--back" data-parallax="0.07"><div className="frame__bar"><i/><i/><i/></div><img src="/images/rental/admin.png" width="1336" height="750" alt="" loading="lazy"/></div>
+      <div className="frame frame--front"><div className="frame__bar"><i/><i/><i/><span>Urlaub-GOSCH – Unterkünfte</span></div><img src="/images/urlaub-gosch/unterkuenfte.webp" width="800" height="448" alt="Unterkunftsliste von Urlaub-GOSCH mit Schnellfiltern und Ostsee-Wetter" loading="lazy"/></div>
+      <div className="frame frame--back" data-parallax="0.07"><div className="frame__bar"><i/><i/><i/></div><img src="/images/urlaub-gosch/start.webp" width="800" height="448" alt="" loading="lazy"/></div>
      </div>
      <div className="reveal reveal-delay-1">
-      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Rental</h3>
-      <p className="prose">Gäste suchen nach Zeitraum, Ort und Ausstattung. Vermieter pflegen Objekte, Preiszeiten, Nebenkosten und Verfügbarkeiten, inklusive Kalenderabgleich per iCal.</p>
-      <div className="work__meta"><span className="tag">Ferienvermietung</span><span className="tag">Verfügbarkeiten</span><span className="tag">Verwaltungsbereich</span></div>
-      <Link className="link" href="/projects#rental">Suche und Verwaltung ansehen<ArrowRight size={16}/></Link>
+      <h3 className="h2" style={{fontSize:'clamp(1.6rem,2.6vw,2.1rem)'}}>Urlaub-GOSCH</h3>
+      <p className="prose">Ferienvermietung an der Ostsee. Gäste suchen nach Zeitraum, Ort und Ausstattung und sehen die Belegung direkt. Der Vermieter pflegt Objekte, Preise und Verfügbarkeiten, mit Kalenderabgleich per iCal.</p>
+      <div className="work__meta"><span className="tag">Kundenprojekt</span><span className="tag">Verfügbarkeiten</span><span className="tag">Verwaltungsbereich</span></div>
+      <Link className="link" href="/projects#urlaub-gosch">Ansichten und Live-Seite<ArrowRight size={16}/></Link>
      </div>
     </article>
    </div>

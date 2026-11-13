@@ -223,3 +223,5 @@ html .ai-chart__key{display:inline-block;width:10px;height:10px;border-radius:2p
 html .ai-chart__key--k{background:var(--fjord)}html .ai-chart__key--w{background:var(--brass);margin-left:8px}
 @media (max-width:640px){html .ai-ws__log{max-height:58vh;padding:10px}html .ai-msg{max-width:100%}html .ai-ws__head .mini-btn{padding-inline:8px}html .task__tools{flex-direction:column}}
 @media (max-width:640px){html .ai-ws__head{flex-wrap:wrap}html .ai-ws__head>div{flex:1 1 calc(100% - 60px)}html .ai-ws__head .mini-btn{margin-left:56px}}
+html body{overflow-x:clip}
+html .gallery{align-content:start;align-self:start}html .gallery__thumbs{align-items:flex-start}
